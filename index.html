@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Уроки модуля 9 · Eduson Kids</title>
+<meta name="description" content="Презентации уроков модуля «Нейросети и AI-проекты» для преподавателей Eduson Kids.">
+<meta name="robots" content="noindex">
+<style>
+@font-face{font-family:'Inter';font-style:normal;font-weight:400 800;font-display:swap;src:url(assets/fonts/inter-cyrillic.woff2) format('woff2');unicode-range:U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116}
+@font-face{font-family:'Inter';font-style:normal;font-weight:400 800;font-display:swap;src:url(assets/fonts/inter-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Inter Tight';font-style:normal;font-weight:600 900;font-display:swap;src:url(assets/fonts/intertight-cyrillic.woff2) format('woff2');unicode-range:U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116}
+@font-face{font-family:'Inter Tight';font-style:normal;font-weight:600 900;font-display:swap;src:url(assets/fonts/intertight-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+:root{
+  --violet:#8C7FF6; --violet-deep:#6F61E8; --violet-text:#5B4DD6; --violet-bg:#F0EEFE; --violet-ring:#A79EF9;
+  --green:#3DF79D; --ink:#17171C; --muted:#62626B; --line:#E3E3EA; --page:#F7F7FA;
+  --f-head:'Inter Tight','Inter','Segoe UI',system-ui,sans-serif;
+  --f-body:'Inter','Segoe UI',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:400 16px/1.5 var(--f-body);background:var(--page);color:var(--ink);-webkit-font-smoothing:antialiased}
+a:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+
+.hero{position:relative;overflow:hidden;background:var(--violet);padding:48px 24px 72px}
+.hero::before{content:"";position:absolute;left:50%;top:-40%;width:max(1100px,110%);height:180%;transform:translateX(-50%);border:3px solid var(--violet-ring);border-radius:50%;pointer-events:none}
+.hero__in{position:relative;max-width:872px;margin:0 auto}
+.brand{font:800 16px/1 var(--f-head)}
+.badge{display:inline-block;margin:32px 0 14px;padding:9px 16px;border-radius:11px;background:var(--green);font:800 16px/1 var(--f-head);transform:rotate(-2deg)}
+h1{font:800 clamp(34px,6vw,52px)/1.08 var(--f-head);letter-spacing:-.02em}
+.hero p{margin-top:12px;font-size:18px}
+
+main{position:relative;max-width:920px;margin:-40px auto 0;padding:0 24px 56px}
+.lessons{list-style:none;display:grid;gap:12px}
+.lesson{display:grid;grid-template-columns:48px 1fr auto;gap:20px;align-items:center;padding:20px 24px;background:#fff;border:1px solid var(--line);border-radius:18px}
+.num{display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:var(--violet-bg);color:var(--violet-text);font:800 20px/1 var(--f-head)}
+h2{font:800 22px/1.2 var(--f-head)}
+.lesson p{margin-top:4px;color:var(--muted)}
+.lesson .meta{margin-top:6px;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}
+.actions{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:172px}
+.open{display:block;width:100%;padding:13px 20px;border-radius:12px;background:var(--violet-deep);color:#fff;font:700 16px/1.25 var(--f-head);text-align:center;text-decoration:none;transition:background-color .15s ease-out}
+.open:hover{background:var(--violet-text)}
+.extra{display:inline-block;padding:6px 8px;color:var(--violet-text);font-size:14px;font-weight:600;text-underline-offset:3px}
+.extra:hover{color:var(--ink)}
+
+.lesson--soon{background:transparent}
+.lesson--soon .num{background:#EFEFF2;color:var(--muted)}
+.lesson--soon h2{font-size:18px;font-weight:700;color:var(--muted)}
+.soon{min-width:172px;color:var(--muted);font-size:14px;font-weight:600;text-align:center}
+
+.help{margin-top:28px;padding:20px 24px;border-radius:18px;background:var(--violet-bg)}
+.help h2{font-size:18px;margin-bottom:8px}
+.help ul{padding-left:20px;display:grid;gap:4px}
+kbd{padding:1px 7px;border:1px solid var(--violet-ring);border-radius:6px;background:#fff;font:600 14px var(--f-body)}
+
+@media (max-width:680px){
+  .hero{padding:32px 16px 64px}
+  main{padding:0 16px 40px}
+  .lesson{grid-template-columns:40px 1fr;gap:14px;padding:18px}
+  .num{width:40px;height:40px;font-size:17px}
+  .actions{grid-column:1/-1;min-width:0}
+  .soon{grid-column:2;min-width:0;text-align:left;margin-top:-10px}
+}
+@media (prefers-reduced-motion:reduce){.open{transition:none}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="hero__in">
+    <div class="brand">Eduson Kids · для преподавателей</div>
+    <div class="badge">Модуль 9</div>
+    <h1>Нейросети и AI-проекты</h1>
+    <p>Выберите урок и откройте презентацию. Возраст детей: 7–9 лет.</p>
+  </div>
+</header>
+<main>
+  <ol class="lessons">
+    <li class="lesson">
+      <span class="num" aria-hidden="true">1</span>
+      <div>
+        <h2>Введение в нейросети</h2>
+        <p>Как нейросеть учится и почему ошибается. Первый запрос в Алисе AI.</p>
+        <p class="meta">60 минут · 24 слайда</p>
+      </div>
+      <div class="actions">
+        <a class="open" href="ai-intro/dist/index.html" aria-label="Открыть урок 1">Открыть урок</a>
+        <a class="extra" href="ai-intro/dist/audience.html" aria-label="Экран для детей, урок 1">Экран для детей</a>
+      </div>
+    </li>
+    <li class="lesson">
+      <span class="num" aria-hidden="true">2</span>
+      <div>
+        <h2>Текстовый промптинг. Часть 1</h2>
+        <p>Запрос из трёх частей: цель, контекст, формат.</p>
+        <p class="meta">45 минут · 24 слайда</p>
+      </div>
+      <div class="actions">
+        <a class="open" href="prompting-1/dist/index.html" aria-label="Открыть урок 2">Открыть урок</a>
+        <a class="extra" href="prompting-1/dist/practice.html" aria-label="Рабочий лист, урок 2">Рабочий лист</a>
+      </div>
+    </li>
+    <li class="lesson">
+      <span class="num" aria-hidden="true">3</span>
+      <div>
+        <h2>Текстовый промптинг. Часть 2</h2>
+        <p>Разговор с нейросетью: роль, образец, шаги, проверка фактов.</p>
+        <p class="meta">45 минут · 23 слайда</p>
+      </div>
+      <div class="actions">
+        <a class="open" href="prompting-2/dist/index.html" aria-label="Открыть урок 3">Открыть урок</a>
+        <a class="extra" href="prompting-2/dist/practice.html" aria-label="Рабочий лист, урок 3">Рабочий лист</a>
+      </div>
+    </li>
+    <li class="lesson lesson--soon"><span class="num" aria-hidden="true">4</span><h2>Генерация изображений. Часть 1</h2><span class="soon">Готовится</span></li>
+    <li class="lesson lesson--soon"><span class="num" aria-hidden="true">5</span><h2>Генерация изображений. Часть 2</h2><span class="soon">Готовится</span></li>
+    <li class="lesson lesson--soon"><span class="num" aria-hidden="true">6</span><h2>Генерация видео</h2><span class="soon">Готовится</span></li>
+    <li class="lesson lesson--soon"><span class="num" aria-hidden="true">7</span><h2>Создание мини-трейлера</h2><span class="soon">Готовится</span></li>
+    <li class="lesson lesson--soon"><span class="num" aria-hidden="true">8</span><h2>Мини-сайт в Lovable</h2><span class="soon">Готовится</span></li>
+  </ol>
+  <section class="help">
+    <h2>В презентации</h2>
+    <ul>
+      <li>Речь и подсказки: кнопка «Преподавателю» или клавиша <kbd>N</kbd>. Перед показом детям закройте их.</li>
+      <li>Слайды: стрелки <kbd>←</kbd> <kbd>→</kbd>. Полный экран: <kbd>F</kbd>.</li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>

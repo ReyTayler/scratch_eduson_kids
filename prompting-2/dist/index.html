@@ -1,0 +1,1469 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Текстовый промптинг. Часть 2 · Eduson Kids</title><meta name="description" content="Урок для детей 7–9 лет: контекст чата, роль и образец в запросе, проверка фактов и текстовый AI-квиз."><style>
+/* ============ Дизайн-токены Eduson Kids ============ */
+:root{
+  --ek-violet:#8C7FF6; --ek-violet-soft:#A79EF9; --ek-violet-deep:#6F61E8; --ek-violet-bg:#F0EEFE;
+  --ek-green:#3DF79D; --ek-green-soft:#7BF9BD; --ek-green-mint:#C9F7E3; --ek-green-pale:#E7FDF2; --ek-green-deep:#0FBF6E;
+  --ek-ink:#17171C; --ek-gray:#8F8F98; --ek-gray-light:#EFEFF2; --ek-line:#E3E3EA;
+  --ek-red:#FF6B6B; --ek-red-soft:#FF8A8A; --ek-red-deep:#E04848; --ek-red-pale:#FFECEC;
+  --f-head:'Inter Tight','Inter','Segoe UI',system-ui,sans-serif;
+  --f-body:'Inter','Segoe UI',system-ui,sans-serif;
+  --f-mono:'JetBrains Mono','Cascadia Mono','Consolas',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--f-body);background:#E9E9F1;color:var(--ek-ink);-webkit-font-smoothing:antialiased}
+
+/* ============ Хром: прогресс, счётчик, подсказка ============ */
+.progress{position:fixed;top:0;left:0;right:0;height:4px;background:rgba(23,23,28,.08);z-index:100}
+.progress__fill{height:100%;width:0%;background:var(--ek-violet);transition:width 300ms ease}
+.counter{position:fixed;top:14px;right:18px;z-index:90;font:600 13px var(--f-body);color:var(--ek-gray);background:#fff;border:1px solid var(--ek-line);padding:6px 14px;border-radius:999px;font-variant-numeric:tabular-nums}
+.counter b{color:var(--ek-ink)}
+.hint{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);z-index:90;font:500 11px var(--f-body);color:var(--ek-gray);background:#fff;border:1px solid var(--ek-line);padding:6px 14px;border-radius:999px;letter-spacing:.03em}
+.hint kbd{font-family:var(--f-mono);background:var(--ek-gray-light);padding:1px 6px;border-radius:4px;font-size:10px;margin:0 2px;color:var(--ek-ink)}
+
+/* ============ Сцена 1280×720 ============ */
+.stage{position:absolute;left:50%;top:50%;width:1280px;height:720px;transform:translate(-50%,-50%);border-radius:18px;overflow:hidden;box-shadow:0 30px 90px rgba(23,23,28,.18);background:#fff}
+.slide{position:absolute;inset:0;background:#fff;opacity:0;transform:translateY(26px);transition:opacity 280ms ease,transform 280ms ease;pointer-events:none;font-family:var(--f-head)}
+.slide.active{opacity:1;transform:none;pointer-events:auto}
+.slide.prev{transform:translateY(-26px)}
+.slide--violet{background:var(--ek-violet)}
+.slide--green{background:var(--ek-green)}
+
+/* Номер страницы на контентных слайдах */
+.slide--content::after{content:attr(data-page);position:absolute;right:54px;bottom:30px;font:800 30px/1 var(--f-head);color:var(--ek-ink);opacity:.5}
+
+/* ============ Декор «Орбита» ============ */
+.sl-orbit{position:absolute;inset:0;pointer-events:none}
+.slide--violet .sl-orbit{--decor:#A79EF9;--letter:#C4BEFA}
+.slide--green .sl-orbit{--decor:#7BF9BD;--letter:#C4FCE0}
+.sl-ring{position:absolute;left:50%;top:50%;width:1040px;height:660px;transform:translate(-50%,-50%);border:3px solid var(--decor);border-radius:50%;opacity:.9}
+.sl-ico{position:absolute;color:var(--decor)}
+.sl-letter{position:absolute;border-radius:50%;background:var(--decor);color:var(--letter);display:flex;align-items:center;justify-content:center;font:800 var(--fs,40px)/1 var(--f-head);font-style:normal}
+
+/* ============ Каверы: карточка-окно и спич-бабл ============ */
+.cover-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2}
+.cover-card{position:relative;width:860px;background:#fff;border-radius:28px;box-shadow:0 30px 80px rgba(23,23,28,.18)}
+.card-top{display:flex;justify-content:space-between;align-items:center;padding:24px 30px 0}
+.win-dots{display:flex;gap:9px}
+.win-dots i{width:13px;height:13px;border-radius:50%;background:var(--ek-violet)}
+.win-close{position:relative;width:22px;height:22px}
+.win-close::before,.win-close::after{content:"";position:absolute;left:-1px;top:9px;width:24px;height:4px;border-radius:2px;background:var(--ek-violet)}
+.win-close::before{transform:rotate(45deg)}
+.win-close::after{transform:rotate(-45deg)}
+.cover-card .badge{position:absolute;left:50%;top:-30px;transform:translateX(-50%) rotate(-4deg)}
+.cover-card h1{padding:26px 64px 30px;text-align:center;font:800 50px/1.14 var(--f-head);letter-spacing:-.015em;color:var(--ek-ink)}
+.cover-card .cover-sub{padding:0 80px 34px;text-align:center;font:500 19px/1.5 var(--f-body);color:#3C3C45}
+.cover-card .cover-chips{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;padding:0 40px 40px}
+.bubble{position:relative;width:660px;background:#EFEFF1;border-radius:30px;padding:56px 70px;text-align:center}
+.bubble::after{content:"";position:absolute;right:56px;bottom:-24px;width:0;height:0;border-left:38px solid transparent;border-top:28px solid #EFEFF1}
+.bubble h1{font:800 42px/1.25 var(--f-head);letter-spacing:-.01em;color:var(--ek-ink)}
+.bubble p{margin-top:16px;font:500 18px/1.5 var(--f-body);color:#3C3C45}
+
+/* ============ Стикер-бейдж и чипы ============ */
+.badge{display:inline-block;background:var(--ek-green);color:var(--ek-ink);font:800 24px/1 var(--f-head);padding:13px 22px;border-radius:13px;transform:rotate(-3deg);box-shadow:0 10px 24px rgba(23,23,28,.10)}
+.badge--violet{background:var(--ek-violet);color:#fff}
+.badge--sm{font-size:16px;padding:9px 16px;border-radius:10px}
+.chip{display:inline-block;font:700 14px/1 var(--f-body);padding:8px 14px;border-radius:999px;background:var(--ek-violet-bg);color:var(--ek-violet-deep)}
+.chip--green{background:var(--ek-green-pale);color:var(--ek-green-deep)}
+.chip--gray{background:var(--ek-gray-light);color:#3C3C45}
+
+/* ============ Контентные слайды ============ */
+.sl-body{position:absolute;inset:0;padding:56px 80px 62px;display:flex;flex-direction:column;gap:16px;overflow:hidden}
+h2{font:800 38px/1.16 var(--f-head);letter-spacing:-.01em;color:var(--ek-ink)}
+.acc{color:var(--ek-violet-deep)}
+.sl-body>p, .col p{font:500 18px/1.5 var(--f-body);color:#3C3C45}
+.code-chip{font-family:var(--f-mono);font-weight:700;font-size:.88em;background:var(--ek-violet-bg);color:var(--ek-violet-deep);padding:2px 8px;border-radius:8px;white-space:nowrap}
+.hl{color:var(--ek-violet-deep);font-weight:700}
+.out-chip{font-family:var(--f-mono);font-weight:700;font-size:.88em;background:var(--ek-green-pale);color:#0B7A48;padding:2px 8px;border-radius:8px;white-space:nowrap}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;align-items:stretch}
+
+.info-card{background:#F5F5F9;border-radius:18px;padding:18px 22px;font:500 16px/1.55 var(--f-body);color:#3C3C45}
+.info-card h3{font:800 19px/1.3 var(--f-head);color:var(--ek-ink);margin-bottom:8px}
+.ek-note{background:var(--ek-violet-bg);border-left:4px solid var(--ek-violet);border-radius:0 14px 14px 0;padding:14px 20px;font:600 17px/1.5 var(--f-body);color:#3C3560}
+.ek-note--green{background:var(--ek-green-pale);border-left-color:var(--ek-green-deep);color:#0B5B39}
+.ek-note--red{background:var(--ek-red-pale);border-left-color:var(--ek-red);color:#7A2E2E}
+
+ul.clean{list-style:none;display:flex;flex-direction:column;gap:10px}
+ul.clean li{display:flex;gap:14px;align-items:flex-start;font:500 17.5px/1.5 var(--f-body);color:#3C3C45}
+ul.clean li::before{content:'—';flex:0 0 auto;color:var(--ek-violet-deep);font-weight:800}
+
+ol.steps{list-style:none;counter-reset:step;display:flex;flex-direction:column;gap:12px}
+ol.steps li{counter-increment:step;display:flex;gap:16px;align-items:center;padding:14px 20px;background:#F5F5F9;border-radius:16px;font:500 17.5px/1.45 var(--f-body);color:#2E2E36}
+ol.steps li::before{content:counter(step);flex:0 0 40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--ek-violet);font:800 18px var(--f-head);color:#fff}
+ol.steps li:last-child::before{background:var(--ek-green);color:var(--ek-ink)}
+ol.steps.steps--tight{gap:8px}
+ol.steps.steps--tight li{padding:9px 16px;font-size:15.5px;gap:12px}
+ol.steps.steps--tight li::before{flex-basis:32px;height:32px;font-size:14px}
+
+.q-label{font:700 13px/1 var(--f-head);letter-spacing:.08em;text-transform:uppercase;color:var(--ek-gray)}
+
+/* ============ План занятия (agenda) ============ */
+.agenda{display:flex;flex-direction:column;gap:8px}
+.agenda-row{display:flex;gap:16px;align-items:center;padding:10px 18px;background:#F5F5F9;border-radius:14px}
+.agenda-row .t{flex:0 0 84px;text-align:center;font:800 14px/1 var(--f-mono);color:var(--ek-ink);background:var(--ek-green);border-radius:999px;padding:8px 0}
+.agenda-row .tt{font:700 16.5px/1.3 var(--f-head);color:var(--ek-ink)}
+.agenda-row .dd{font:500 14px/1.4 var(--f-body);color:var(--ek-gray)}
+
+/* ============ Ключ-значение (привычки, шпаргалки) ============ */
+.kv{display:flex;flex-direction:column}
+.kv-row{display:grid;grid-template-columns:250px 1fr;gap:18px;align-items:start;padding:11px 4px;border-bottom:1.5px solid var(--ek-line)}
+.kv-row:last-child{border-bottom:none}
+.kv-row .k{font:800 14px/1.35 var(--f-head);letter-spacing:.05em;text-transform:uppercase;color:var(--ek-violet-deep);padding-top:2px}
+.kv-row .v{font:500 16.5px/1.5 var(--f-body);color:#3C3C45}
+
+/* ============ Окно кода (статичное) ============ */
+.code-win{background:#fff;border:2.5px solid var(--ek-ink);border-radius:16px;overflow:hidden;font-family:var(--f-mono);box-shadow:10px 10px 0 rgba(140,127,246,.14)}
+.code-head{display:flex;align-items:center;justify-content:space-between;padding:9px 16px;border-bottom:2px solid var(--ek-ink)}
+.code-head .win-dots i{width:11px;height:11px}
+.lang-badge{font:700 11px var(--f-mono);letter-spacing:.14em;color:var(--ek-gray)}
+.code-body{padding:14px 20px;font:500 14.5px/1.6 var(--f-mono);color:var(--ek-ink);white-space:pre;overflow:auto;max-height:400px;tab-size:4}
+.code-body .cm{color:var(--ek-gray)}
+.code-body .st{color:var(--ek-green-deep)}
+.code-body .kw{color:var(--ek-violet-deep);font-weight:700}
+
+/* ============ Терминал (тёмное окно) ============ */
+.term{background:var(--ek-ink);border-radius:16px;overflow:hidden;font-family:var(--f-mono);box-shadow:10px 10px 0 rgba(23,23,28,.12)}
+.term-head{display:flex;align-items:center;justify-content:space-between;padding:9px 16px;border-bottom:1px solid rgba(255,255,255,.14)}
+.term-head .win-dots i{width:11px;height:11px;background:var(--ek-green)}
+.term-head .lang-badge{color:rgba(255,255,255,.5)}
+.term-body{padding:14px 20px;font:500 14.5px/1.62 var(--f-mono);color:var(--ek-green);white-space:pre-wrap;word-break:break-word;overflow:auto;max-height:420px}
+.term-body .usr{color:#fff}
+.term-body .dim{color:rgba(255,255,255,.55)}
+
+/* ============ Промпт-карточка (диалог с DeepSeek) ============ */
+.prompt-card{position:relative;background:var(--ek-violet-bg);border:2.5px solid var(--ek-violet);border-radius:18px;padding:20px 26px 18px;box-shadow:10px 10px 0 rgba(140,127,246,.18)}
+.prompt-card .pc-tag{position:absolute;top:-16px;left:22px;background:var(--ek-violet);color:#fff;font:800 14px/1 var(--f-head);padding:9px 16px;border-radius:10px;transform:rotate(-2deg);box-shadow:0 8px 18px rgba(23,23,28,.12)}
+.prompt-card .pc-text{margin-top:6px;font:500 15px/1.62 var(--f-mono);color:#2E2A52;white-space:pre-wrap}
+.prompt-card .pc-text .hl{color:var(--ek-violet-deep)}
+.prompt-card--copy .pc-tag{background:var(--ek-green);color:var(--ek-ink)}
+
+/* ============ Сравнение (vs) ============ */
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:stretch}
+.vs-col{border-radius:18px;padding:20px 24px}
+.vs-col h4{font:800 15px/1 var(--f-head);letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px}
+.vs-col p{font:500 16px/1.55 var(--f-body)}
+.vs-col .note{margin-top:12px;font:500 13.5px/1.4 var(--f-body);opacity:.75}
+.vs-col--plain{background:var(--ek-gray-light);color:#3C3C45}
+.vs-col--plain h4{color:var(--ek-gray)}
+.vs-col--win{background:var(--ek-green-pale);color:#124F35;border:2px solid var(--ek-green-soft)}
+.vs-col--win h4{color:var(--ek-green-deep)}
+
+/* ============ Квиз с раскрытием ответа ============ */
+.quiz-box{background:#F5F5F9;border:2.5px solid var(--ek-ink);border-radius:18px;padding:22px 26px;box-shadow:10px 10px 0 rgba(61,247,157,.25)}
+.quiz-box .q-num{display:inline-block;background:var(--ek-green);color:var(--ek-ink);font:800 13px/1 var(--f-head);letter-spacing:.08em;text-transform:uppercase;padding:8px 14px;border-radius:999px;margin-bottom:14px}
+.quiz-box .q-text{font:700 21px/1.42 var(--f-head);color:var(--ek-ink)}
+.quiz-answer{margin-top:16px}
+.quiz-btn{border:0;border-radius:12px;padding:12px 22px;font:800 15px/1 var(--f-head);cursor:pointer;background:var(--ek-violet);color:#fff;transition:background .15s}
+.quiz-btn:hover{background:var(--ek-violet-deep)}
+.quiz-reveal{display:none;margin-top:14px;background:var(--ek-green-pale);border-left:4px solid var(--ek-green-deep);border-radius:0 14px 14px 0;padding:14px 20px;font:500 16.5px/1.55 var(--f-body);color:#0B5B39}
+.quiz-reveal.show{display:block}
+.quiz-reveal p+p{margin-top:8px}
+
+/* Появление контента */
+.slide.active .info-card,.slide.active ul.clean li,.slide.active ol.steps li,.slide.active .grid-2>*,.slide.active .grid-3>*,.slide.active .agenda-row,.slide.active .kv-row{animation:reveal 450ms ease backwards}
+.slide.active .info-card:nth-child(2),.slide.active ul.clean li:nth-child(2),.slide.active ol.steps li:nth-child(2),.slide.active .grid-2>*:nth-child(2),.slide.active .grid-3>*:nth-child(2),.slide.active .agenda-row:nth-child(2),.slide.active .kv-row:nth-child(2){animation-delay:80ms}
+.slide.active ul.clean li:nth-child(3),.slide.active ol.steps li:nth-child(3),.slide.active .grid-3>*:nth-child(3),.slide.active .agenda-row:nth-child(3),.slide.active .kv-row:nth-child(3){animation-delay:160ms}
+.slide.active ol.steps li:nth-child(4),.slide.active .agenda-row:nth-child(4),.slide.active .kv-row:nth-child(4){animation-delay:240ms}
+.slide.active ol.steps li:nth-child(5),.slide.active .agenda-row:nth-child(5),.slide.active .kv-row:nth-child(5){animation-delay:320ms}
+.slide.active .agenda-row:nth-child(6),.slide.active ol.steps li:nth-child(6),.slide.active .kv-row:nth-child(6){animation-delay:400ms}
+.slide.active .agenda-row:nth-child(7),.slide.active ol.steps li:nth-child(7),.slide.active .kv-row:nth-child(7){animation-delay:480ms}
+@keyframes reveal{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@media (prefers-reduced-motion:reduce){.slide.active .info-card,.slide.active ul.clean li,.slide.active ol.steps li,.slide.active .grid-2>*,.slide.active .grid-3>*,.slide.active .agenda-row,.slide.active .kv-row{animation:none}}
+
+/* ============ Заметки преподавателя ============ */
+.notes{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--ek-line);box-shadow:0 -16px 40px rgba(23,23,28,.10);padding:20px 40px;z-index:95;max-height:40vh;overflow-y:auto;transform:translateY(100%);transition:transform 300ms ease}
+.notes.active{transform:translateY(0)}
+.notes__header{font:800 11px var(--f-head);letter-spacing:.2em;text-transform:uppercase;color:var(--ek-violet-deep);margin-bottom:8px}
+.notes__body{font:500 15px/1.55 var(--f-body);color:#3C3C45}
+
+:focus-visible{outline:3px solid var(--ek-violet-soft);outline-offset:2px;border-radius:6px}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(23,23,28,.15);border-radius:4px}
+/* Larger type and touch controls for ages 7–9. Base components: supplied Eduson Kids design book. */
+.toolbar{position:fixed;top:14px;left:28px;right:28px;display:flex;align-items:center;justify-content:space-between;z-index:90}.brand{font-size:21px;font-weight:800}.brand b{color:var(--ek-violet-deep)}.toolbar>div{display:flex;gap:8px}button{font-family:var(--f-body);cursor:pointer;border:0;border-radius:12px;padding:12px 18px;background:#fff;color:var(--ek-ink);font-size:15px;font-weight:700}button:hover{box-shadow:inset 0 0 0 2px var(--ek-violet)}button:disabled{opacity:.4;cursor:default}.controls{position:fixed;bottom:14px;left:0;right:0;display:flex;gap:18px;align-items:center;justify-content:center}.controls button{font-size:22px;padding:8px 24px}.controls>span{font-size:14px;font-variant-numeric:tabular-nums}.key-hint{position:absolute;right:24px;font-size:11px!important;color:#55555e}.stage{box-shadow:0 16px 60px #17171c18}.sl-body{gap:24px;padding:48px 80px 68px}.lesson-label{display:flex;justify-content:space-between;font:700 16px var(--f-body);color:#64646e;margin-bottom:6px}.lesson-label span{font-weight:500}h2{font-size:46px}.sl-body>p{font-size:25px}.card-row{margin-top:8px;flex:1;max-height:335px}.info-card{padding:26px;border-radius:24px;font-size:24px;line-height:1.4}.info-card h3{font-size:29px;margin:20px 0 14px;line-height:1.2}.info-card p{font-size:24px;line-height:1.4}.card-num{display:inline-flex;width:42px;height:42px;align-items:center;justify-content:center;background:var(--ek-violet-bg);color:var(--ek-violet-deep);border-radius:12px;font-size:19px;font-weight:800}.grid-2 .info-card:last-child{background:var(--ek-green-pale)}.ek-note{font-size:23px;padding:17px 24px}.statement{font:700 39px/1.42 var(--f-head);padding:34px 40px;background:var(--ek-violet-bg);border-radius:28px;margin-top:12px}.slide--content::after{font-size:25px;bottom:24px}.steps{margin-top:8px}.steps li{font-size:26px!important;padding:22px 24px!important;line-height:1.35!important}.steps li:before{font-size:22px!important;flex-basis:46px!important;height:46px!important}.quiz-box{padding:28px;box-shadow:8px 8px 0 #3df79d33}.quiz-box .q-text{font-size:28px;line-height:1.38}.options{display:grid;gap:12px;margin-top:22px}.option{display:flex;align-items:center;gap:18px;text-align:left;border:2px solid var(--ek-line);font-size:24px;font-weight:600;padding:17px 20px}.option>span{border-radius:50%;background:var(--ek-violet-bg);width:38px;height:38px;display:flex;align-items:center;justify-content:center;flex-shrink:0}.option.correct{background:var(--ek-green-pale);border-color:var(--ek-green-deep)}.option.wrong{background:var(--ek-red-pale);border-color:var(--ek-red)}.feedback{font:600 22px/1.4 var(--f-body);margin-top:16px}.feedback:empty{display:none}.small{font-size:17px;margin-top:12px;background:var(--ek-violet-bg)}.reveal{background:var(--ek-violet);font-size:22px;margin-top:26px;color:var(--ek-ink)}.reveal-text{font:500 25px/1.45 var(--f-body);background:var(--ek-green-pale);padding:22px;border-radius:16px;margin-top:20px}.sample-window{border:2px solid var(--ek-ink);border-radius:26px;box-shadow:10px 10px 0 var(--ek-violet-bg)}.sample-window>p{font:600 32px/1.5 var(--f-body);padding:32px 40px}.cover-card h1{font-size:62px;padding-top:32px}.cover-card .cover-sub{font-size:28px;padding:0 65px 30px}.cover-card .cover-chips .chip{font-size:17px;color:#3c3560}.bubble{width:850px;padding:48px 62px;background:#fff}.bubble h1{font-size:52px}.bubble p{font-size:27px}.bubble .optional{font-size:22px;border-top:2px solid var(--ek-line);padding-top:22px;margin-top:22px}.worksheet{display:grid;gap:16px}.worksheet label{font:700 22px var(--f-body);display:grid;grid-template-columns:290px 1fr;gap:18px;align-items:center}.worksheet input{font:500 23px var(--f-body);padding:18px;border:2px solid var(--ek-line);border-radius:14px;width:100%;color:var(--ek-ink)}#saveHero{align-self:flex-start;background:var(--ek-green);font-size:22px}.notes.active{transform:none}.notes{padding:24px 32px;max-height:45vh}.notes__body{font-size:18px;max-width:1200px}.close-panel{float:right;background:var(--ek-gray-light)}dialog{margin:auto;width:min(900px,94vw);max-height:85vh;border:0;padding:28px;border-radius:26px;color:var(--ek-ink);box-shadow:0 30px 100px #17171c44}dialog::backdrop{background:#17171c77}.dialog-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.dialog-head h2{font-size:30px}dialog nav{display:grid;grid-template-columns:1fr 1fr;gap:8px}dialog nav button{text-align:left;display:flex;gap:14px;background:var(--ek-gray-light);line-height:1.4}dialog nav b{color:var(--ek-violet-deep)}[hidden]{display:none!important}.slide:not(.active){visibility:hidden}.slide.active{visibility:visible}.slide.active .info-card,.slide.active ol.steps li{animation:none}
+@media(max-width:700px){.toolbar{left:12px;right:12px}.brand{font-size:16px}.toolbar button{font-size:11px;padding:10px}.key-hint{display:none}dialog nav{grid-template-columns:1fr}.dialog-head h2{font-size:22px}.notes{padding:18px}.notes__body{font-size:16px}}
+@media print{@page{size:landscape;margin:0}html,body{height:auto;overflow:visible;background:#fff}.toolbar,.controls,.notes,.progress,dialog{display:none!important}.stage{position:static;transform:none!important;width:auto;height:auto;overflow:visible;box-shadow:none;border-radius:0}.slide,.slide:not(.active){position:relative;width:1280px;height:720px;visibility:visible;opacity:1;transform:none;page-break-after:always;break-after:page;print-color-adjust:exact;-webkit-print-color-adjust:exact}.reveal-text{display:block!important}.sl-body{overflow:visible}}
+.practice-prompt{background:var(--ek-violet-bg);border:2px solid var(--ek-violet);border-radius:22px;padding:24px 28px}.practice-prompt>p{font:600 27px/1.42 var(--f-body);user-select:text}.copy-prompt{margin-top:18px;background:#fff;font-size:19px}.copy-status{font:500 17px var(--f-body);margin-left:14px}.slide-actions{display:flex;gap:14px;flex-wrap:wrap}.action-link{display:inline-block;text-decoration:none;background:var(--ek-green);color:var(--ek-ink);font:700 22px var(--f-body);padding:15px 22px;border-radius:14px}.action-link:hover{box-shadow:inset 0 0 0 2px var(--ek-ink)}.sl-body:has(.slide-actions){gap:16px}.sl-body:has(.slide-actions) .steps li{padding:15px 22px!important;font-size:24px!important}.sl-body:has(.slide-actions) .ek-note{font-size:21px;padding:13px 20px}.sl-body:has(.slide-actions) h2{font-size:44px}
+.notes__body{white-space:pre-line}
+.goals{display:grid;grid-template-columns:5fr 7fr;gap:24px;margin-top:18px}.goal-card{background:var(--ek-violet-bg);border:2px solid var(--ek-violet);border-radius:22px;padding:28px 30px}.goal-card p{font:600 28px/1.32 var(--f-body);margin:12px 0 0}.goal-list{background:#fff;border:2px solid #e3e3ea;border-radius:22px;padding:28px 30px}.goal-list ul{margin:12px 0 0;padding-left:26px}.goal-list li{font:500 24px/1.32 var(--f-body);margin:0 0 10px}.goal-label{font:700 18px/1.2 var(--f-body);text-transform:uppercase;letter-spacing:.04em;color:var(--ek-violet-deep)}
+</style><style>
+/* ================= Доска (drauu) ================= */
+.kb-svg{position:absolute;left:0;top:0;width:100%;height:100%;z-index:40;pointer-events:none;overflow:visible}
+.kb-svg[hidden]{display:none}
+#kb-sheet{position:absolute;inset:0;z-index:39;background:#fff}
+#kb-sheet[hidden]{display:none}
+.kb-on .kb-svg{pointer-events:auto;cursor:crosshair;touch-action:none}
+.kb-on.kb-t-eraser .kb-svg{cursor:cell}
+.kb-on.kb-t-laser .kb-svg{pointer-events:none}
+.kb-on.kb-t-laser,.kb-on.kb-t-laser *{cursor:none}
+.kb-on.kb-t-laser .slide.active{pointer-events:none}
+#kb-laser{position:absolute;left:0;top:0;width:24px;height:24px;margin:-12px 0 0 -12px;border-radius:50%;z-index:41;pointer-events:none;
+  background:radial-gradient(circle,#fff 0 18%,#FF3B3B 20% 60%,rgba(255,59,59,.35) 62% 100%);box-shadow:0 0 16px 6px rgba(255,59,59,.45)}
+#kb-laser[hidden]{display:none}
+.kb-bar{position:fixed;left:50%;bottom:64px;transform:translateX(-50%);z-index:60;display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:center;max-width:96vw;
+  background:#fff;border:2px solid #E3E3EA;border-radius:16px;box-shadow:0 10px 30px rgba(23,23,28,.18);padding:4px 6px}
+.kb-bar[hidden]{display:none}
+.kb-group{display:flex;gap:2px;align-items:center}
+.kb-group+.kb-group{padding-left:6px;border-left:2px solid #E3E3EA}
+button.kb-btn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;padding:8px;border:0;border-radius:10px;background:transparent;color:#17171C;cursor:pointer}
+.kb-btn svg{width:20px;height:20px;display:block}
+button.kb-btn:hover{background:#F0EEFE}
+button.kb-btn[aria-pressed="true"]{background:#8C7FF6;color:#fff}
+button.kb-btn:disabled{opacity:.3;cursor:default;background:transparent}
+.kb-colors{gap:6px;padding-right:2px}
+button.kb-sw{width:22px;height:22px;border:0;padding:0;cursor:pointer;background:var(--sw);border-radius:50%}
+button.kb-sw:hover{background:var(--sw)}
+button.kb-sw[aria-pressed="true"]{outline:2px solid #17171C;outline-offset:2px}
+#kb-toggle{display:inline-flex;align-items:center;gap:6px}
+#kb-toggle svg{width:16px;height:16px;display:block}
+#kb-toggle[aria-pressed="true"]{background:#8C7FF6;border-color:#8C7FF6;color:#fff}
+#kb-toggle.kb-float{position:fixed;top:10px;right:12px;z-index:20;opacity:0;pointer-events:none;transition:opacity .15s}
+.show-controls #kb-toggle.kb-float,body.kb-active #kb-toggle.kb-float,#kb-toggle.kb-float:focus-visible{opacity:1;pointer-events:auto}
+@media print{.kb-bar,#kb-toggle,#kb-laser{display:none!important}}
+</style>
+</head><body><div class="progress"><div id="progress" class="progress__fill"></div></div><header class="toolbar"><span class="brand">eduson <b>kids</b></span><div><button id="menuBtn" aria-expanded="false">Содержание</button><button id="notesBtn" aria-expanded="false">Преподавателю</button><button id="kb-toggle" type="button" aria-pressed="false" title="Доска (D)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>Доска</button><button id="fullBtn">Весь экран</button></div></header><main class="stage" id="deck"><section class="slide slide--violet" data-page="1" aria-label="Слайд 1: Текстовый промптинг. Часть 2" data-notes="1 минута.
+Скажите: «В модуле 3 вы собирали викторину в Scratch. Сегодня вопросы для викторины придумает Алиса, а вы будете проверять, правду ли она написала».
+
+Перед уроком:
+• Откройте https://alice.yandex.ru/. «Персонализированное общение» в настройках чата должно быть отключено.
+• Заранее отправьте запрос со слайда 14 на разрешённые темы. Убедитесь, что викторина получается и вопросы можно проверить.
+• Подготовьте источник по каждой теме: детскую энциклопедию или проверенный взрослым сайт. Без источника шаг проверки не сработает.
+• В группе подготовьте доступ на каждую пару. Дети не регистрируются.
+
+Если Алиса недоступна, перенесите практику: готовый набор вопросов её не заменяет."><div class="sl-orbit" aria-hidden="true"><i class="sl-ring"></i><svg class="sl-ico" viewBox="0 0 100 100" style="left:60px;top:30px;width:150px;height:150px"><use href="#ek-i-trophy"/></svg><i class="sl-letter" style="left:480px;top:22px;width:78px;height:78px;--fs:36px">S</i><svg class="sl-ico" viewBox="0 0 100 100" style="right:60px;top:28px;width:130px;height:130px"><use href="#ek-i-heart"/></svg><i class="sl-letter" style="left:55px;top:330px;width:96px;height:96px;--fs:44px">A</i><i class="sl-letter" style="right:48px;top:330px;width:96px;height:96px;--fs:44px">I</i><svg class="sl-ico" viewBox="0 0 100 100" style="left:95px;bottom:40px;width:120px;height:120px"><use href="#ek-i-star"/></svg><svg class="sl-ico" viewBox="0 0 100 100" style="right:80px;bottom:40px;width:120px;height:120px"><use href="#ek-i-gem"/></svg></div><div class="cover-center"><div class="cover-card"><div class="badge">Викторина с Алисой</div><div class="card-top"><span class="win-dots"><i></i><i></i><i></i></span><span class="win-close" aria-hidden="true"></span></div><h1>Текстовый промптинг. Часть 2</h1><p class="cover-sub">Зададим Алисе роль, покажем образец и проверим факты в нашей викторине.</p><div class="cover-chips"><span class="chip">Scratch и нейросети</span><span class="chip">Модуль 9 · Урок 3</span><span class="chip">7–9 лет</span></div></div></div></section><section class="slide slide--content" data-page="2" aria-label="Слайд 2: Цель и результат урока" data-notes="1 минута. Прочитайте цель и пункты вслух.
+
+Для преподавателя, образовательные результаты:
+• Объясняет, что Алиса помнит разговор внутри чата. Проверка: слайд 4, шаг 5 практики.
+• Добавляет к запросу роль и образец. Проверка: слайд 7, поле 2.
+• Объясняет, почему подходящая по смыслу фраза бывает неверной, и проверяет факт по источнику. Проверка: слайды 8–9, поле 5.
+• Просит заменить вопрос и не менять остальные. Проверка: поле 6.
+• Сдаёт квиз, в котором ответы проверены человеком. Проверка: поля 5 и 7.
+Мини-проект: «Текстовый AI-квиз».
+
+Не входит в этот урок: запросы для картинок (уроки 4–5). Сборка викторины в Scratch тоже не обязательна."><div class="sl-body"><div class="lesson-label">Scratch и нейросети <span>Модуль 9 · Урок 3</span></div><h2>Цель и результат урока</h2><div class="goals"><div class="goal-card"><span class="goal-label">Цель урока</span><p>Научиться вести разговор с Алисой: задавать роль, показывать образец и проверять факты в ответе.</p></div><div class="goal-list"><span class="goal-label">К концу урока вы</span><ul><li>Объясните, что Алиса помнит в чате.</li><li>Добавите к запросу роль и образец.</li><li>Проверите ответы по надёжному источнику.</li><li>Попросите заменить неудачный вопрос.</li></ul></div></div><div class="ek-note">Результат урока: викторина из трёх вопросов, ответы в которой вы проверили сами.</div></div></section><section class="slide slide--content" data-page="3" aria-label="Слайд 3: Вспомним прошлый урок" data-notes="1 минута. Попросите открыть файл со сценарием и назвать в своём запросе цель и контекст. Если файла нет, разберите запрос про кота Пуха: «Придумай сценарий игры в Scratch. Герой: кот Пух, умеет высоко прыгать. Он ищет дорогу домой. Напиши 4 коротких пункта»."><div class="sl-body"><div class="lesson-label">Scratch и нейросети <span>Модуль 9 · Урок 3</span></div><h2>Вспомним прошлый урок</h2><div class="quiz-box" data-correct="0"><p class="q-text">Какие три части мы добавляли в запрос?</p><div class="options"><button class="option" data-answer="0"><span>A</span>Цель, контекст и формат</button><button class="option" data-answer="1"><span>B</span>Имя, адрес и телефон</button></div><p class="feedback" aria-live="polite" data-answer="Цель, контекст и формат. Сегодня добавим к ним ещё два приёма."></p><button class="reset small" hidden>Попробовать снова</button></div></div></section><section class="slide slide--content" data-page="4" aria-label="Слайд 4: Что Алиса помнит?" data-notes="2 минуты. Покажите на своём экране.
+В новом чате напишите: «Моего героя зовут Пух». Затем спросите: «Как зовут моего героя?». Алиса должна ответить, потому что видит разговор. Потом откройте другой чат и задайте тот же вопрос.
+Что написано в справке: «В чате сохраняется контекст беседы», а чаты «не будут смешиваться друг с другом». У Алисы есть отдельная функция «Персонализированное общение»: со входом в аккаунт она может учитывать сведения о вас и в других диалогах. Поэтому перед уроком функцию нужно отключить и проверить опыт заранее.
+Если результат отличается от ожидаемого, не скрывайте это: скажите, что сервисы меняются, и покажите, почему личные сведения в чат мы не пишем."><div class="sl-body"><div class="lesson-label">Scratch и нейросети <span>Модуль 9 · Урок 3</span></div><h2>Что Алиса помнит?</h2><div class="grid-2 card-row"><div class="info-card"><span class="card-num">01</span><h3>В том же чате</h3><p>Алиса видит наши прошлые сообщения и свои ответы.</p></div><div class="info-card"><span class="card-num">02</span><h3>В новом чате</h3><p>Разговор начинается заново. Беседы из разных чатов не смешиваются.</p></div></div><div class="ek-note">Поэтому уточнения мы отправляем в тот же чат.</div></div></section><section class="slide slide--content" data-page="5" aria-label="Слайд 5: Приём 1. Роль" data-notes="1 минута.
+В справке Алисы AI это отдельный совет: «Определите роль». Пример оттуда: «Выступи в роли опытного туристического гида по городу Ярославль».
+Скажите детям прямо: от роли у Алисы не появляются новые знания и она не становится настоящим специалистом. Роль задаёт направление и тон ответа. Ошибаться Алиса может и в роли."><div class="sl-body"><div class="lesson-label">Scratch и нейросети <span>Модуль 9 · Урок 3</span></div><h2>Приём 1. Роль</h2><div class="statement">Роль подсказывает Алисе, как отвечать: «Выступи в роли ведущего викторины».</div><div class="ek-note">Роль меняет то, как Алиса говорит. Знать больше она от этого не станет.</div></div></section><section class="slide slide--content" data-page="6" aria-label="Слайд 6: Приём 2. Образец" data-notes="2 минуты.
+В справке Алисы AI совет называется «Включайте примеры». Разработчики нейросетей (Google, Anthropic) советуют то же: несколько примеров в запросе делают ответы точнее и единообразнее.
+Вспомните урок 1: нейросеть обучали на множестве примеров. Здесь другое: образец лежит в запросе и работает в этом разговоре. Заново Алису он не обучает.
+Если показать только один образец, Алиса может слишком точно его копировать. Это нормально, проверяем ответ."><div class="sl-body"><div class="lesson-label">Scratch и нейросети <span>Модуль 9 · Урок 3</span></div><h2>Приём 2. Образец</h2><p>Покажите, как должен выглядеть ответ.</p><div class="grid-2 card-row"><div class="info-card"><span class="card-num">01</span><h3>Без образца</h3><p>«Придумай вопрос». Как он будет выглядеть, Алиса выберет сама.</p></div><div class="info-card"><span class="card-num">02</span><h3>С образцом</h3><p>«Образец: Кто мяукает? А) собака Б) кошка В) рыба. Ответ: Б».</p></div></div></div></section><section class="slide slide--content" data-page="7" aria-label="Слайд 7: Что выберем?" data-notes="1 минута. Попросите объяснить, почему «красиво» не поможет."><div class="sl-body"><div class="lesson-label">Scratch и нейросети <span>Модуль 9 · Урок 3</span></div><h2>Что выберем?</h2><div class="quiz-box" data-correct="0"><p class="q-text">Нужно, чтобы все вопросы викторины выглядели одинаково. Что сделать?</p><div class="options"><button class="option" data-answer="0"><span>A</span>Показать образец вопроса в запросе</button><button class="option" data-answer="1"><span>B</span>Написать: «Сделай красиво»</button></div><p class="feedback" aria-live="polite" data-answer="Показать образец. Алиса увидит, как должны выглядеть вопросы."></p><button class="reset small" hidden>Попробовать снова</button></div></div></section><section class="slide slide--content" data-page="8" aria-label="Слайд 8: Почему в ответах бывают ошибки?" data-notes="2 минуты.
+Свяжите с уроком 2: модель выбирает вероятное продолжение. Такой способ даёт складный текст, но складность не доказывает, что сведения верные. Даже если сервис ищет сведения в интернете, ошибка всё равно возможна.
+Прочитайте предупреждение из справки: «Алиса AI старается, но может ошибаться. Проверяйте важную информацию».
+Такие выдуманные, но правдоподобные ответы называют галлюцинациями. Слово запоминать не обязательно.
+Точность зависит от сервиса и вопроса, поэтому не утверждайте, что Алиса ошибается всегда или часто. Цель шага: проверяем, а не ловим её на ошибке."><div class="sl-body"><div class="lesson-label">Scratch и нейросети <span>Модуль 9 · Урок 3</span></div><h2>Почему в ответах бывают ошибки?</h2><div class="statement">Алиса выбирает слова, которые часто идут дальше. Складная фраза не всегда оказывается правдой.</div><div class="ek-note">Справка Алисы предупреждает: «Алиса AI старается, но может ошибаться. Проверяйте важную информацию».</div></div></section><section class="slide slide--content" data-page="9" aria-label="Слайд 9: Как проверить ответ?" data-notes="1 минута.
+Фразу про Венеру мы сочинили для примера, Алиса её не писала. Самая близкая к Солнцу планета это Меркурий.
+Спросите: «Почему нельзя просто спросить Алису “Ты уверена?”». Она может изменить ответ или повторить его: ни то, ни другое не доказывает, где правда."><div class="sl-body"><div class="lesson-label">Scratch и нейросети <span>Модуль 9 · Урок 3</span></div><h2>Как проверить ответ?</h2><div class="quiz-box" data-correct="1"><p class="q-text">В викторине написано: «Самая близкая к Солнцу планета: Венера». Что сделаем?</p><div class="options"><button class="option" data-answer="0"><span>A</span>Спросим Алису «Ты уверена?» и поверим ей</button><button class="option" data-answer="1"><span>B</span>Посмотрим в энциклопедии или на сайте вместе со взрослым</button></div><p class="feedback" aria-live="polite" data-answer="Посмотрим в источнике. Самая близкая к Солнцу планета: Меркурий. Ответ самой Алисы проверкой не считается."></p><button class="reset small" hidden>Попробовать снова</button></div></div></section><section class="slide slide--content" data-page="10" aria-label="Слайд 10: Разминка" data-notes="2 минуты. Без прыжков, дыхание не задерживаем, можно выполнять сидя. Попросите отвести взгляд от экрана."><div class="sl-body"><div class="lesson-label">Scratch и нейросети <span>Модуль 9 · Урок 3</span></div><h2>Разминка</h2><div class="statement">Сожмите и разожмите кулаки.<br>Медленно поверните голову влево и вправо.<br>Посмотрите вдаль и поморгайте.</div><div class="ek-note">Повторите в удобном темпе.</div></div></section><section class="slide slide--content" data-page="11" aria-label="Слайд 11: Практика: своя викторина" data-notes="1 минута. С этого слайда до сохранения файла идёт практика: 25 минут.
+Большую задачу разбиваем на шаги: это совет из справки Алисы («Используйте многоэтапные запросы»). Одним сообщением такое делать сложнее, и ошибку труднее заметить.
+В паре один читает вопрос, другой ищет ответ в источнике, затем они меняются."><div class="sl-body"><div class="lesson-label">Scratch и нейросети <span>Модуль 9 · Урок 3</span></div><h2>Практика: своя викторина</h2><p>Большую задачу сделаем по шагам: так ошибку легче заметить.</p><div class="grid-3 card-row"><div class="info-card"><span class="card-num">01</span><h3>Вопросы</h3><p>Алиса придумает 3 вопроса по нашему образцу.</p></div><div class="info-card"><span class="card-num">02</span><h3>Проверка</h3><p>Сверим ответы с надёжным источником.</p></div><div class="info-card"><span class="card-num">03</span><h3>Игра</h3><p>Алиса проведёт викторину в том же чате.</p></div></div><div class="ek-note">В конце у вас будет викторина, которую вы проверили сами.</div></div></section><section class="slide slide--content" data-page="12" aria-label="Слайд 12: Открываем Алису и лист" data-notes="2 минуты.
+Лист открываем один раз: после обновления записи пропадут.
+Положите рядом подготовленный источник: книгу или вкладку сайта."><div class="sl-body"><div class="lesson-label">Scratch и нейросети <span>Модуль 9 · Урок 3</span></div><h2>Открываем Алису и лист</h2><ol class="steps"><li>Откройте сайт Алисы AI и начните новый чат.</li><li>Откройте рабочий лист во второй вкладке.</li><li>Приготовьте энциклопедию или сайт, который дал преподаватель.</li></ol><div class="slide-actions"><a class="action-link" href="https://alice.yandex.ru/" target="_blank" rel="noopener">Открыть Алису AI ↗</a><a class="action-link" href="practice.html" target="_blank" rel="noopener">Рабочий лист ↗</a></div></div></section><section class="slide slide--content" data-page="13" aria-label="Слайд 13: Выбираем тему" data-notes="1 минута.
+Нужна тема с настоящими фактами, потому что ответы мы будем проверять. Предложите те темы, для которых вы подготовили источник. Можно взять тему, близкую к миру героя: живёт в космосе, значит, викторина про планеты.
+Вопросы про выдуманного героя здесь не подойдут: выдуманное не сверишь с энциклопедией."><div class="sl-body"><div class="lesson-label">Scratch и нейросети <span>Модуль 9 · Урок 3</span></div><h2>Выбираем тему</h2><div class="grid-3 card-row"><div class="info-card"><span class="card-num">01</span><h3>Космос</h3><p>Планеты, звёзды и Луна.</p></div><div class="info-card"><span class="card-num">02</span><h3>Животные</h3><p>Обитатели леса или моря.</p></div><div class="info-card"><span class="card-num">03</span><h3>Другая тема</h3><p>Если преподаватель подготовил для неё источник.</p></div></div><div class="ek-note">Запишите тему и источник в поле 1.</div></div></section><section class="slide slide--content" data-page="14" aria-label="Слайд 14: Шаг 1. Отправляем запрос с ролью и образцом" data-notes="4 минуты.
+Дети подставляют тему. Покажите в запросе роль, цель, контекст (это тема), формат и образец.
+Дождитесь ответа и скопируйте запрос и ответ в поля 2 и 3.
+Алиса может показать ответы сразу, это нормально: сначала нам нужно их проверить."><div class="sl-body"><div class="lesson-label">Scratch и нейросети <span>Модуль 9 · Урок 3</span></div><h2>Шаг 1. Отправляем запрос с ролью и образцом</h2><p>Подставьте свою тему и отправьте сообщение.</p><div class="practice-prompt"><p>Выступи в роли ведущего викторины для младших школьников. Тема: [космос]. Придумай 3 вопроса с вариантами ответа. Образец: Кто мяукает? А) собака Б) кошка В) рыба. Ответ: Б.</p><button class="copy-prompt">Скопировать запрос</button><span class="copy-status" aria-live="polite"></span></div><div class="ek-note">Запрос и ответ вставьте в поля 2 и 3.</div></div></section><section class="slide slide--content" data-page="15" aria-label="Слайд 15: Шаг 2. Всё ли есть в ответе?" data-notes="2 минуты. Отмечаем в поле 4 только то, что нашли. Здесь смотрим, как выполнена просьба. Правдивость проверим на следующем шаге."><div class="sl-body"><div class="lesson-label">Scratch и нейросети <span>Модуль 9 · Урок 3</span></div><h2>Шаг 2. Всё ли есть в ответе?</h2><ol class="steps"><li>Есть 3 вопроса?</li><li>У каждого вопроса 3 варианта ответа?</li><li>У каждого вопроса назван ответ?</li></ol><div class="ek-note">Чего-то нет? Попросите Алису добавить это в том же чате.</div></div></section><section class="slide slide--content" data-page="16" aria-label="Слайд 16: Шаг 3. Проверяем факты" data-notes="6 минут, примерно по 2 на вопрос.
+Смотрим в источник, а не спрашиваем Алису. Взрослый помогает с чтением и поиском.
+Для каждого вопроса в поле 5 пишем: верно, неверно или не нашли. «Не нашли» это честный результат: вопрос тоже нужно заменить, ведь проверить его не удалось.
+Ошибок может не оказаться. Тогда результат такой: мы проверили и убедились. Не требуйте обязательно найти ошибку."><div class="sl-body"><div class="lesson-label">Scratch и нейросети <span>Модуль 9 · Урок 3</span></div><h2>Шаг 3. Проверяем факты</h2><p>Проверьте каждый вопрос. Спросить саму Алису не считается.</p><ol class="steps"><li>Прочитайте вопрос и ответ Алисы.</li><li>Найдите ответ в энциклопедии или на сайте.</li><li>Запишите в поле 5: верно, неверно или не нашли.</li></ol></div></section><section class="slide slide--content" data-page="17" aria-label="Слайд 17: Шаг 4. Заменяем вопрос" data-notes="3 минуты.
+Отправляем в том же чате: Алиса видит предыдущие вопросы.
+Если неверных или ненайденных вопросов несколько, напишите их номера в одной просьбе. Не успеваете проверить замену? Такой вопрос в игру не берём.
+Если все вопросы верные, ребёнок заменяет тот, который кажется слишком лёгким или скучным.
+Новый вопрос проверяем так же, по источнику. Итоговую викторину вставляем в поле 7."><div class="sl-body"><div class="lesson-label">Scratch и нейросети <span>Модуль 9 · Урок 3</span></div><h2>Шаг 4. Заменяем вопрос</h2><p>Отправьте просьбу в тот же чат.</p><div class="practice-prompt"><p>Замени вопрос [номер]: [почему он не подходит]. Остальные вопросы оставь без изменений.</p><button class="copy-prompt">Скопировать запрос</button><span class="copy-status" aria-live="polite"></span></div><div class="ek-note">Просьбу запишите в поле 6. Новый вопрос тоже проверьте, а викторину вставьте в поле 7.</div></div></section><section class="slide slide--content" data-page="18" aria-label="Слайд 18: Шаг 5. Играем в викторину" data-notes="3 минуты.
+Ответы дети уже знают, поэтому играем иначе: на один вопрос отвечаем нарочно неверно и смотрим, заметит ли Алиса.
+Алиса справится, только если видит вопросы в этом чате. Это и есть память чата из начала урока.
+Алиса может отступить от правил игры или перейти на новые вопросы. Тогда это наблюдение для поля 8, а новые вопросы мы не проверяли: скажите об этом вслух."><div class="sl-body"><div class="lesson-label">Scratch и нейросети <span>Модуль 9 · Урок 3</span></div><h2>Шаг 5. Играем в викторину</h2><p>Сыграйте. На один вопрос ответьте нарочно неверно: заметит ли Алиса?</p><div class="practice-prompt"><p>Теперь проведи эту викторину: задавай по одному вопросу из нашего списка и жди мой ответ. После ответа скажи, верно ли.</p><button class="copy-prompt">Скопировать запрос</button><span class="copy-status" aria-live="polite"></span></div><div class="ek-note">Запишите в поле 8, как прошла игра и соблюдала ли Алиса правила.</div></div></section><section class="slide slide--content" data-page="19" aria-label="Слайд 19: Сохраняем викторину" data-notes="3 минуты.
+Обязательны поля 1, 2, 3, 5, 6, 7 и 8. В поле 4 галочки ставятся только за то, что нашли.
+Зачёт ставится за действия и файл. Находить ошибку у Алисы не обязательно.
+Загрузки запрещены? Перенесите записи в разрешённый текстовый документ.
+Если Алиса отвечала медленно, сократите игру и общее обсуждение, но не проверку фактов и сохранение."><div class="sl-body"><div class="lesson-label">Scratch и нейросети <span>Модуль 9 · Урок 3</span></div><h2>Сохраняем викторину</h2><ol class="steps"><li>Вернитесь на вкладку листа и проверьте: все поля заполнены?</li><li>Нажмите «Сохранить рабочий лист».</li><li>Найдите файл в загрузках.</li></ol><div class="ek-note">Готово, если можете показать, как проверили каждый ответ.</div></div></section><section class="slide slide--content" data-page="20" aria-label="Слайд 20: Показываем викторину" data-notes="3 минуты.
+На индивидуальном уроке ребёнок показывает лист. В группе дети рассказывают в парах, потом 2–3 примера слушаем всем классом.
+Если у кого-то Алиса ошиблась, разберите этот случай вместе. Без насмешек: ни над Алисой, ни над ребёнком."><div class="sl-body"><div class="lesson-label">Scratch и нейросети <span>Модуль 9 · Урок 3</span></div><h2>Показываем викторину</h2><ol class="steps"><li>Задайте один вопрос из своей викторины.</li><li>Покажите, где проверили ответ.</li><li>Расскажите, какой вопрос заменили и почему.</li></ol></div></section><section class="slide slide--content" data-page="21" aria-label="Слайд 21: Проверим себя" data-notes="1 минута. Выходная проверка: попросите назвать источник, по которому ребёнок проверил ответ."><div class="sl-body"><div class="lesson-label">Scratch и нейросети <span>Модуль 9 · Урок 3</span></div><h2>Проверим себя</h2><div class="quiz-box" data-correct="0"><p class="q-text">Алиса уверенно ответила на вопрос о космосе. Как узнать, что ответ верный?</p><div class="options"><button class="option" data-answer="0"><span>A</span>Сверить с надёжным источником</button><button class="option" data-answer="1"><span>B</span>Поверить: она ответила уверенно</button></div><p class="feedback" aria-live="polite" data-answer="Сверить с источником. Если Алиса пишет уверенно, это ещё не значит, что верно."></p><button class="reset small" hidden>Попробовать снова</button></div></div></section><section class="slide slide--content" data-page="22" aria-label="Слайд 22: Что мы теперь знаем" data-notes="1 минута. Свяжите выводы с практикой: роль и образец в запросе, проверка по источнику, игра в том же чате."><div class="sl-body"><div class="lesson-label">Scratch и нейросети <span>Модуль 9 · Урок 3</span></div><h2>Что мы теперь знаем</h2><div class="grid-3 card-row"><div class="info-card"><span class="card-num">01</span><h3>Память чата</h3><p>Алиса видит разговор в этом чате.</p></div><div class="info-card"><span class="card-num">02</span><h3>Роль и образец</h3><p>Помогают получить ответ нужного вида.</p></div><div class="info-card"><span class="card-num">03</span><h3>Проверка</h3><p>Факты сверяем с надёжным источником.</p></div></div></div></section><section class="slide slide--green" data-page="23" aria-label="Слайд 23: Викторина готова!" data-notes="1 минута.
+Проверьте, что файл сохранён.
+Подведите к следующему уроку: цель, контекст, формат и образец понадобятся и для картинок. Там описание героя и сценария станет запросом на постер.
+Следующий урок: генерация изображений, часть 1."><div class="sl-orbit" aria-hidden="true"><i class="sl-ring"></i><svg class="sl-ico" viewBox="0 0 100 100" style="left:60px;top:30px;width:150px;height:150px"><use href="#ek-i-trophy"/></svg><i class="sl-letter" style="left:480px;top:22px;width:78px;height:78px;--fs:36px">S</i><svg class="sl-ico" viewBox="0 0 100 100" style="right:60px;top:28px;width:130px;height:130px"><use href="#ek-i-heart"/></svg><i class="sl-letter" style="left:55px;top:330px;width:96px;height:96px;--fs:44px">A</i><i class="sl-letter" style="right:48px;top:330px;width:96px;height:96px;--fs:44px">I</i><svg class="sl-ico" viewBox="0 0 100 100" style="left:95px;bottom:40px;width:120px;height:120px"><use href="#ek-i-star"/></svg><svg class="sl-ico" viewBox="0 0 100 100" style="right:80px;bottom:40px;width:120px;height:120px"><use href="#ek-i-gem"/></svg></div><div class="cover-center"><div class="bubble"><h1>Викторина готова!</h1><p>Вы сделали викторину и сами проверили её ответы. На следующем уроке будем создавать картинки: опишем героя так, чтобы нейросеть смогла его нарисовать.</p><p class="optional">Дома, если захотите: сыграйте в свою викторину со взрослым.</p></div></div></section></main><footer class="controls"><button id="prev" aria-label="Предыдущий слайд">←</button><span id="counter" aria-live="polite"></span><button id="next" aria-label="Следующий слайд">→</button><span class="key-hint">← → слайды · N заметки · F весь экран</span></footer><aside id="notes" class="notes" aria-label="Заметки преподавателя" hidden><button class="close-panel" id="closeNotes">Закрыть ×</button><div class="notes__header">Преподавателю</div><p id="notesBody" class="notes__body"></p></aside><dialog id="contents"><div class="dialog-head"><h2>Содержание урока</h2><button id="closeMenu">Закрыть ×</button></div><nav><button data-slide="0"><b>01</b>Текстовый промптинг. Часть 2</button><button data-slide="1"><b>02</b>Цель и результат урока</button><button data-slide="2"><b>03</b>Вспомним прошлый урок</button><button data-slide="3"><b>04</b>Что Алиса помнит?</button><button data-slide="4"><b>05</b>Приём 1. Роль</button><button data-slide="5"><b>06</b>Приём 2. Образец</button><button data-slide="6"><b>07</b>Что выберем?</button><button data-slide="7"><b>08</b>Почему в ответах бывают ошибки?</button><button data-slide="8"><b>09</b>Как проверить ответ?</button><button data-slide="9"><b>10</b>Разминка</button><button data-slide="10"><b>11</b>Практика: своя викторина</button><button data-slide="11"><b>12</b>Открываем Алису и лист</button><button data-slide="12"><b>13</b>Выбираем тему</button><button data-slide="13"><b>14</b>Шаг 1. Отправляем запрос с ролью и образцом</button><button data-slide="14"><b>15</b>Шаг 2. Всё ли есть в ответе?</button><button data-slide="15"><b>16</b>Шаг 3. Проверяем факты</button><button data-slide="16"><b>17</b>Шаг 4. Заменяем вопрос</button><button data-slide="17"><b>18</b>Шаг 5. Играем в викторину</button><button data-slide="18"><b>19</b>Сохраняем викторину</button><button data-slide="19"><b>20</b>Показываем викторину</button><button data-slide="20"><b>21</b>Проверим себя</button><button data-slide="21"><b>22</b>Что мы теперь знаем</button><button data-slide="22"><b>23</b>Викторина готова!</button></nav></dialog><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="ek-i-trophy" viewBox="0 0 100 100"><path fill="currentColor" d="M24 16h52v12h8c6 0 10 4 10 10 0 15-11 25-23 27-3 5-8 9-14 10v8h14c4 0 7 3 7 7v4H22v-4c0-4 3-7 7-7h14v-8c-6-1-11-5-14-10C17 63 6 53 6 38c0-6 4-10 10-10h8V16zM24 36h-7c-2 0-4 2-4 4 0 8 5 15 12 18-1-5-1-10-1-16v-6zM76 36v6c0 6 0 11-1 16 7-3 12-10 12-18 0-2-2-4-4-4h-7z"/></symbol>
+<symbol id="ek-i-heart" viewBox="0 0 100 100"><path fill="currentColor" d="M50 88C28 72 10 56 10 38 10 24 21 14 34 14c6 0 12 3 16 8 4-5 10-8 16-8 13 0 24 10 24 24 0 18-18 34-40 50z"/></symbol>
+<symbol id="ek-i-star" viewBox="0 0 100 100"><path fill="currentColor" d="M50 8l12 27 29 3-22 20 6 29-25-15-25 15 6-29L9 38l29-3z"/></symbol>
+<symbol id="ek-i-gem" viewBox="0 0 100 100"><path fill="currentColor" d="M30 12h40l18 24-38 52L12 36zM36 20l-12 16h20zM64 20l-8 16h20zM50 22l-9 14h18zM26 44l20 30-8-30zM62 44l-8 30 20-30zM46 44h8l-4 26z"/></symbol>
+</defs></svg><script>(()=>{'use strict';
+const slides=[...document.querySelectorAll('.slide')],stage=document.querySelector('#deck'),notes=document.querySelector('#notes'),menu=document.querySelector('#contents');
+let index=Math.min(slides.length-1,Math.max(0,(parseInt(location.hash.slice(1))||1)-1));
+function fit(){const scale=Math.min((innerWidth-24)/1280,(innerHeight-156)/720);stage.style.transform=`translate(-50%,-50%) scale(${Math.max(.1,scale)})`;}
+function go(n){index=Math.min(slides.length-1,Math.max(0,n));slides.forEach((s,i)=>{s.classList.toggle('active',i===index);s.inert=i!==index;s.setAttribute('aria-hidden',i!==index);});document.querySelector('#counter').textContent=`${index+1} / ${slides.length}`;document.querySelector('#progress').style.width=`${(index+1)/slides.length*100}%`;document.querySelector('#notesBody').textContent=slides[index].dataset.notes;document.querySelector('#prev').disabled=index===0;document.querySelector('#next').disabled=index===slides.length-1;history.replaceState(null,'',`#${index+1}`);}
+function toggleNotes(force){const show=force??notes.hidden;notes.hidden=!show;notes.classList.toggle('active',show);document.querySelector('#notesBtn').setAttribute('aria-expanded',show);}
+async function full(){try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch{document.querySelector('#fullBtn').textContent='Используйте F11';}}
+document.querySelector('#prev').onclick=()=>go(index-1);document.querySelector('#next').onclick=()=>go(index+1);document.querySelector('#notesBtn').onclick=()=>toggleNotes();document.querySelector('#closeNotes').onclick=()=>toggleNotes(false);document.querySelector('#fullBtn').onclick=full;
+document.querySelector('#menuBtn').onclick=()=>{menu.showModal();document.querySelector('#menuBtn').setAttribute('aria-expanded','true');};document.querySelector('#closeMenu').onclick=()=>menu.close();menu.addEventListener('close',()=>document.querySelector('#menuBtn').setAttribute('aria-expanded','false'));menu.querySelectorAll('[data-slide]').forEach(b=>b.onclick=()=>{go(+b.dataset.slide);menu.close();});
+document.addEventListener('keydown',ev=>{if(ev.target.closest('input,textarea,select')||menu.open)return;const k=ev.key.toLowerCase();if(['arrowright','pagedown'].includes(k)){ev.preventDefault();go(index+1);}if(['arrowleft','pageup'].includes(k)){ev.preventDefault();go(index-1);}if(k==='home')go(0);if(k==='end')go(slides.length-1);if(k==='n'||k==='т')toggleNotes();if(k==='f'||k==='а')full();if(k==='escape')toggleNotes(false);});
+document.querySelectorAll('.quiz-box[data-correct]').forEach(box=>{const buttons=[...box.querySelectorAll('.option')],feedback=box.querySelector('.feedback'),reset=box.querySelector('.reset');buttons.forEach(b=>b.onclick=()=>{const ok=+b.dataset.answer===+box.dataset.correct;b.classList.add(ok?'correct':'wrong');feedback.textContent=ok?`Верно! ${feedback.dataset.answer}`:'Подумаем ещё. Какой вариант подходит лучше?';if(ok)buttons.forEach(x=>x.disabled=true);else b.disabled=true;reset.hidden=false;});reset.onclick=()=>{buttons.forEach(b=>{b.disabled=false;b.classList.remove('correct','wrong');});feedback.textContent='';reset.hidden=true;};});
+document.querySelectorAll('.reveal').forEach(b=>b.onclick=()=>{const p=b.nextElementSibling;p.hidden=!p.hidden;b.setAttribute('aria-expanded',!p.hidden);b.textContent=p.hidden?'Обсудили? Открыть ответ':'Скрыть ответ';});
+document.querySelectorAll('.copy-prompt').forEach(b=>b.onclick=async()=>{const text=b.previousElementSibling.textContent;const status=b.nextElementSibling;try{await navigator.clipboard.writeText(text);status.textContent='Скопировано. Замените слова в скобках.';}catch{status.textContent='Выделите текст запроса и скопируйте его вручную.';}});
+window.addEventListener('resize',fit);window.addEventListener('hashchange',()=>go((parseInt(location.hash.slice(1))||1)-1));fit();go(index);
+})();
+</script><div class="kb-bar" id="kb-bar" role="toolbar" aria-label="Доска" hidden><div class="kb-group"><button type="button" class="kb-btn" data-tool="pen" aria-pressed="false" title="Ручка" aria-label="Ручка"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></button><button type="button" class="kb-btn" data-tool="marker" aria-pressed="false" title="Маркер" aria-label="Маркер"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 15l-4 4v1h5l4-4"/><path d="M8 12l6-9 7 7-9 6z"/></svg></button><button type="button" class="kb-btn" data-tool="arrow" aria-pressed="false" title="Стрелка" aria-label="Стрелка"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19L19 5"/><path d="M10 5h9v9"/></svg></button><button type="button" class="kb-btn" data-tool="rect" aria-pressed="false" title="Рамка" aria-label="Рамка"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="6" width="16" height="12" rx="3"/></svg></button><button type="button" class="kb-btn" data-tool="laser" aria-pressed="false" title="Указка" aria-label="Указка"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.5" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg></button><button type="button" class="kb-btn" data-tool="eraser" aria-pressed="false" title="Ластик" aria-label="Ластик"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3l5 5-10 10H6l-3-3z"/><path d="M9 21h12"/></svg></button></div><div class="kb-group kb-colors"><button type="button" class="kb-sw" data-color="#E04848" style="--sw:#E04848" aria-pressed="false" title="Красный" aria-label="Цвет: Красный"></button><button type="button" class="kb-sw" data-color="#FFC53D" style="--sw:#FFC53D" aria-pressed="false" title="Жёлтый" aria-label="Цвет: Жёлтый"></button><button type="button" class="kb-sw" data-color="#0FBF6E" style="--sw:#0FBF6E" aria-pressed="false" title="Зелёный" aria-label="Цвет: Зелёный"></button><button type="button" class="kb-sw" data-color="#6F61E8" style="--sw:#6F61E8" aria-pressed="false" title="Фиолетовый" aria-label="Цвет: Фиолетовый"></button><button type="button" class="kb-sw" data-color="#17171C" style="--sw:#17171C" aria-pressed="false" title="Тёмный" aria-label="Цвет: Тёмный"></button></div><div class="kb-group"><button type="button" class="kb-btn" data-act="undo" title="Отменить (Ctrl+Z)" aria-label="Отменить"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button><button type="button" class="kb-btn" data-act="redo" title="Вернуть (Ctrl+Shift+Z)" aria-label="Вернуть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 14l5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/></svg></button><button type="button" class="kb-btn" data-act="sheet" aria-pressed="false" title="Чистый лист: один на всю презентацию" aria-label="Чистый лист"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/></svg></button><button type="button" class="kb-btn" data-act="clear" title="Стереть всё на этом слайде" aria-label="Стереть всё на этом слайде"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button><button type="button" class="kb-btn" data-act="close" title="Закрыть доску (D или Esc)" aria-label="Закрыть доску"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div></div>
+<script>/*! drauu 1.0.0 (@drauu/core) · https://github.com/antfu/drauu
+MIT License
+
+Copyright (c) 2020-2021 Anthony Fu
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+;(function(){
+//#region ../../node_modules/.pnpm/nanoevents@9.1.0/node_modules/nanoevents/index.js
+let createNanoEvents = () => ({
+	emit(event, ...args) {
+		for (let callbacks = this.events[event] || [], i = 0, length = callbacks.length; i < length; i++) callbacks[i](...args);
+	},
+	events: {},
+	on(event, cb) {
+		(this.events[event] ||= []).push(cb);
+		return () => {
+			this.events[event] = this.events[event]?.filter((i) => cb !== i);
+		};
+	}
+});
+
+//#endregion
+//#region src/utils/index.ts
+function numSort(a$1, b$1) {
+	return a$1 - b$1;
+}
+function getSymbol(a$1) {
+	if (a$1 < 0) return -1;
+	return 1;
+}
+function splitNum(a$1) {
+	return [Math.abs(a$1), getSymbol(a$1)];
+}
+function guid() {
+	const S4 = () => ((1 + Math.random()) * 65536 | 0).toString(16).substring(1);
+	return `${S4() + S4()}-${S4()}-${S4()}-${S4()}-${S4()}${S4()}${S4()}`;
+}
+const DECIMAL = 2;
+const D = DECIMAL;
+
+//#endregion
+//#region src/utils/dom.ts
+function createArrowHead(id, fill) {
+	const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+	const marker = document.createElementNS("http://www.w3.org/2000/svg", "marker");
+	const head = document.createElementNS("http://www.w3.org/2000/svg", "path");
+	head.setAttribute("fill", fill);
+	marker.setAttribute("id", id);
+	marker.setAttribute("viewBox", "0 -5 10 10");
+	marker.setAttribute("refX", "5");
+	marker.setAttribute("refY", "0");
+	marker.setAttribute("markerWidth", "4");
+	marker.setAttribute("markerHeight", "4");
+	marker.setAttribute("orient", "auto");
+	head.setAttribute("d", "M0,-5L10,0L0,5");
+	marker.appendChild(head);
+	defs.appendChild(marker);
+	return defs;
+}
+
+//#endregion
+//#region src/utils/simplify.ts
+function getSqDist(p1, p2) {
+	const dx = p1.x - p2.x;
+	const dy = p1.y - p2.y;
+	return dx * dx + dy * dy;
+}
+function getSqSegDist(p, p1, p2) {
+	let x = p1.x;
+	let y = p1.y;
+	let dx = p2.x - x;
+	let dy = p2.y - y;
+	if (dx !== 0 || dy !== 0) {
+		const t = ((p.x - x) * dx + (p.y - y) * dy) / (dx * dx + dy * dy);
+		if (t > 1) {
+			x = p2.x;
+			y = p2.y;
+		} else if (t > 0) {
+			x += dx * t;
+			y += dy * t;
+		}
+	}
+	dx = p.x - x;
+	dy = p.y - y;
+	return dx * dx + dy * dy;
+}
+function simplifyRadialDist(points, sqTolerance) {
+	let prevPoint = points[0];
+	const newPoints = [prevPoint];
+	let point;
+	for (let i = 1, len = points.length; i < len; i++) {
+		point = points[i];
+		if (getSqDist(point, prevPoint) > sqTolerance) {
+			newPoints.push(point);
+			prevPoint = point;
+		}
+	}
+	if (prevPoint !== point && point) newPoints.push(point);
+	return newPoints;
+}
+function simplifyDPStep(points, first, last, sqTolerance, simplified) {
+	let maxSqDist = sqTolerance;
+	let index = 0;
+	for (let i = first + 1; i < last; i++) {
+		const sqDist = getSqSegDist(points[i], points[first], points[last]);
+		if (sqDist > maxSqDist) {
+			index = i;
+			maxSqDist = sqDist;
+		}
+	}
+	if (maxSqDist > sqTolerance) {
+		if (index - first > 1) simplifyDPStep(points, first, index, sqTolerance, simplified);
+		simplified.push(points[index]);
+		if (last - index > 1) simplifyDPStep(points, index, last, sqTolerance, simplified);
+	}
+}
+function simplifyDouglasPeucker(points, sqTolerance) {
+	const last = points.length - 1;
+	const simplified = [points[0]];
+	simplifyDPStep(points, 0, last, sqTolerance, simplified);
+	simplified.push(points[last]);
+	return simplified;
+}
+function simplify(points, tolerance, highestQuality = false) {
+	if (points.length <= 2) return points;
+	const sqTolerance = tolerance !== void 0 ? tolerance * tolerance : 1;
+	points = highestQuality ? points : simplifyRadialDist(points, sqTolerance);
+	points = simplifyDouglasPeucker(points, sqTolerance);
+	return points;
+}
+
+//#endregion
+//#region src/models/base.ts
+var BaseModel = class {
+	constructor(drauu) {
+		this.drauu = drauu;
+		this.event = void 0;
+		this.point = void 0;
+		this.start = void 0;
+		this.el = null;
+	}
+	onSelected(_el) {}
+	onUnselected() {}
+	onStart(_point) {}
+	onMove(_point) {
+		return false;
+	}
+	onEnd(_point) {}
+	get brush() {
+		return this.drauu.brush;
+	}
+	get shiftPressed() {
+		return this.drauu.shiftPressed;
+	}
+	get altPressed() {
+		return this.drauu.altPressed;
+	}
+	get svgElement() {
+		return this.drauu.el;
+	}
+	getMousePosition(event) {
+		const el = this.drauu.el;
+		const cssZoom = this.drauu.options.cssZoom ?? 1;
+		const scale = this.drauu.options.coordinateScale ?? 1;
+		const offset = this.drauu.options.offset ?? {
+			x: 0,
+			y: 0
+		};
+		if (this.drauu.options.coordinateTransform === false) {
+			const rect = this.drauu.el.getBoundingClientRect();
+			return {
+				x: (event.pageX / cssZoom - rect.left + offset.x) * scale,
+				y: (event.pageY / cssZoom - rect.top + offset.y) * scale,
+				pressure: event.pressure
+			};
+		} else {
+			const point = this.drauu.svgPoint;
+			point.x = event.clientX / cssZoom + offset.x;
+			point.y = event.clientY / cssZoom + offset.y;
+			const loc = point.matrixTransform(el.getScreenCTM()?.inverse());
+			return {
+				x: loc.x * scale,
+				y: loc.y * scale,
+				pressure: event.pressure
+			};
+		}
+	}
+	createElement(name, overrides) {
+		const el = document.createElementNS("http://www.w3.org/2000/svg", name);
+		const brush = overrides ? {
+			...this.brush,
+			...overrides
+		} : this.brush;
+		el.setAttribute("fill", brush.fill ?? "transparent");
+		el.setAttribute("stroke", brush.color);
+		el.setAttribute("stroke-width", brush.size.toString());
+		el.setAttribute("stroke-linecap", "round");
+		if (brush.dasharray) el.setAttribute("stroke-dasharray", brush.dasharray);
+		return el;
+	}
+	attr(name, value) {
+		this.el.setAttribute(name, typeof value === "string" ? value : value.toFixed(D));
+	}
+	_setEvent(event) {
+		this.event = event;
+		this.point = this.getMousePosition(event);
+	}
+	/**
+	* @internal
+	*/
+	_eventDown(event) {
+		this._setEvent(event);
+		this.start = this.point;
+		return this.onStart(this.point);
+	}
+	/**
+	* @internal
+	*/
+	_eventMove(event) {
+		this._setEvent(event);
+		return this.onMove(this.point);
+	}
+	/**
+	* @internal
+	*/
+	_eventUp(event) {
+		this._setEvent(event);
+		return this.onEnd(this.point);
+	}
+};
+
+//#endregion
+//#region src/models/draw.ts
+var DrawModel = class DrawModel extends BaseModel {
+	constructor(..._args) {
+		super(..._args);
+		this.points = [];
+		this.count = 0;
+	}
+	onStart(point) {
+		this.el = this.createElement("path", { fill: "transparent" });
+		this.points = [point];
+		if (this.brush.arrowEnd) {
+			this.arrowId = guid();
+			const head = createArrowHead(this.arrowId, this.brush.color);
+			this.el.appendChild(head);
+		}
+		return this.el;
+	}
+	onMove(point) {
+		if (!this.el) this.onStart(point);
+		if (this.points[this.points.length - 1] !== point) {
+			this.points.push(point);
+			this.count += 1;
+		}
+		if (this.count > 5) {
+			this.points = simplify(this.points, 1, true);
+			this.count = 0;
+		}
+		this.attr("d", DrawModel.toSvgData(this.points));
+		return true;
+	}
+	onEnd() {
+		const path = this.el;
+		this.el = null;
+		if (!path) return false;
+		path.setAttribute("d", DrawModel.toSvgData(simplify(this.points, 1, true)));
+		if (!path.getTotalLength()) {
+			const { x, y } = this.points[0];
+			const r = this.brush.size / 2;
+			path.setAttribute("d", `M ${x - r} ${y} a ${r},${r} 0 1,0 ${r * 2},0 a ${r},${r} 0 1,0 ${-r * 2},0`);
+			path.setAttribute("fill", this.brush.color);
+			path.setAttribute("stroke-width", "0");
+		}
+		return true;
+	}
+	static line(a$1, b$1) {
+		const lengthX = b$1.x - a$1.x;
+		const lengthY = b$1.y - a$1.y;
+		return {
+			length: Math.sqrt(lengthX ** 2 + lengthY ** 2),
+			angle: Math.atan2(lengthY, lengthX)
+		};
+	}
+	static controlPoint(current, previous, next, reverse) {
+		const p = previous || current;
+		const n = next || current;
+		const smoothing = .2;
+		const o = DrawModel.line(p, n);
+		const angle = o.angle + (reverse ? Math.PI : 0);
+		const length = o.length * smoothing;
+		return {
+			x: current.x + Math.cos(angle) * length,
+			y: current.y + Math.sin(angle) * length
+		};
+	}
+	static bezierCommand(point, i, points) {
+		const cps = DrawModel.controlPoint(points[i - 1], points[i - 2], point);
+		const cpe = DrawModel.controlPoint(point, points[i - 1], points[i + 1], true);
+		return `C ${cps.x.toFixed(D)},${cps.y.toFixed(D)} ${cpe.x.toFixed(D)},${cpe.y.toFixed(D)} ${point.x.toFixed(D)},${point.y.toFixed(D)}`;
+	}
+	static toSvgData(points) {
+		return points.reduce((acc, point, i, a$1) => i === 0 ? `M ${point.x.toFixed(D)},${point.y.toFixed(D)}` : `${acc} ${DrawModel.bezierCommand(point, i, a$1)}`, "");
+	}
+};
+
+//#endregion
+//#region src/models/ellipse.ts
+var EllipseModel = class extends BaseModel {
+	onStart(point) {
+		this.el = this.createElement("ellipse");
+		this.attr("cx", point.x);
+		this.attr("cy", point.y);
+		return this.el;
+	}
+	onMove(point) {
+		if (!this.el || !this.start) return false;
+		let [dx, sx] = splitNum(point.x - this.start.x);
+		let [dy, sy] = splitNum(point.y - this.start.y);
+		if (this.shiftPressed) {
+			const d = Math.min(dx, dy);
+			dx = d;
+			dy = d;
+		}
+		if (this.altPressed) {
+			this.attr("cx", this.start.x);
+			this.attr("cy", this.start.y);
+			this.attr("rx", dx);
+			this.attr("ry", dy);
+		} else {
+			const [x1, x2] = [this.start.x, this.start.x + dx * sx].sort(numSort);
+			const [y1, y2] = [this.start.y, this.start.y + dy * sy].sort(numSort);
+			this.attr("cx", (x1 + x2) / 2);
+			this.attr("cy", (y1 + y2) / 2);
+			this.attr("rx", (x2 - x1) / 2);
+			this.attr("ry", (y2 - y1) / 2);
+		}
+		return true;
+	}
+	onEnd() {
+		const path = this.el;
+		this.el = null;
+		if (!path) return false;
+		try {
+			if (!path.getTotalLength()) return false;
+		} catch {
+			return false;
+		}
+		return true;
+	}
+};
+
+//#endregion
+//#region src/models/eraser.ts
+var EraserModel = class extends BaseModel {
+	constructor(..._args) {
+		super(..._args);
+		this.pathSubFactor = 20;
+		this.pathFragments = [];
+		this._erased = [];
+	}
+	onSelected(el) {
+		const calculatePathFragments = (children, element) => {
+			if (children && children.length) for (let i = 0; i < children.length; i++) {
+				const ele = children[i];
+				if (ele.getTotalLength) {
+					const pathLength = ele.getTotalLength();
+					for (let j = 0; j < this.pathSubFactor; j++) {
+						const pos1 = ele.getPointAtLength(pathLength * j / this.pathSubFactor);
+						const pos2 = ele.getPointAtLength(pathLength * (j + 1) / this.pathSubFactor);
+						this.pathFragments.push({
+							x1: pos1.x,
+							x2: pos2.x,
+							y1: pos1.y,
+							y2: pos2.y,
+							segment: j,
+							element: element || ele
+						});
+					}
+				} else if (ele.children) calculatePathFragments(ele.children, ele);
+			}
+		};
+		if (el) calculatePathFragments(el.children);
+	}
+	onUnselected() {
+		this.pathFragments = [];
+	}
+	onStart(point) {
+		this.svgPointPrevious = this.svgElement.createSVGPoint();
+		this.svgPointPrevious.x = point.x;
+		this.svgPointPrevious.y = point.y;
+	}
+	onMove(point) {
+		this.svgPointCurrent = this.svgElement.createSVGPoint();
+		this.svgPointCurrent.x = point.x;
+		this.svgPointCurrent.y = point.y;
+		const erased = this.checkAndEraseElement();
+		this.svgPointPrevious = this.svgPointCurrent;
+		return erased;
+	}
+	onEnd() {
+		this.svgPointPrevious = void 0;
+		this.svgPointCurrent = void 0;
+		const erased = this._erased;
+		this._erased = [];
+		return {
+			undo: () => erased.forEach((v) => this.drauu._restoreNode(v)),
+			redo: () => erased.forEach((v) => this.drauu._removeNode(v))
+		};
+	}
+	checkAndEraseElement() {
+		if (this.pathFragments.length) for (let i = 0; i < this.pathFragments.length; i++) {
+			const segment = this.pathFragments[i];
+			if (this.svgPointPrevious && this.svgPointCurrent) {
+				const line = {
+					x1: this.svgPointPrevious.x,
+					x2: this.svgPointCurrent.x,
+					y1: this.svgPointPrevious.y,
+					y2: this.svgPointCurrent.y
+				};
+				if (this.lineLineIntersect(segment, line)) {
+					this.drauu._removeNode(segment.element);
+					this._erased.push(segment.element);
+				}
+			}
+		}
+		if (this._erased.length) this.pathFragments = this.pathFragments.filter((v) => !this._erased.includes(v.element));
+		return this._erased.length > 0;
+	}
+	lineLineIntersect(line1, line2) {
+		const x1 = line1.x1;
+		const x2 = line1.x2;
+		const x3 = line2.x1;
+		const x4 = line2.x2;
+		const y1 = line1.y1;
+		const y2 = line1.y2;
+		const y3 = line2.y1;
+		const y4 = line2.y2;
+		const pt_denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+		const pt_x_num = (x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4);
+		const pt_y_num = (x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4);
+		const btwn = (a$1, b1, b2) => {
+			if (a$1 >= b1 && a$1 <= b2) return true;
+			return a$1 >= b2 && a$1 <= b1;
+		};
+		if (pt_denom === 0) return false;
+		else {
+			const pt = {
+				x: pt_x_num / pt_denom,
+				y: pt_y_num / pt_denom
+			};
+			return btwn(pt.x, x1, x2) && btwn(pt.y, y1, y2) && btwn(pt.x, x3, x4) && btwn(pt.y, y3, y4);
+		}
+	}
+};
+
+//#endregion
+//#region src/models/line.ts
+var LineModel = class extends BaseModel {
+	onStart(point) {
+		this.el = this.createElement("line", { fill: "transparent" });
+		this.attr("x1", point.x);
+		this.attr("y1", point.y);
+		this.attr("x2", point.x);
+		this.attr("y2", point.y);
+		if (this.brush.arrowEnd) {
+			const id = guid();
+			const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+			g.append(createArrowHead(id, this.brush.color));
+			g.append(this.el);
+			this.attr("marker-end", `url(#${id})`);
+			return g;
+		}
+		return this.el;
+	}
+	onMove(point) {
+		if (!this.el) return false;
+		let { x, y } = point;
+		if (this.shiftPressed) {
+			const dx = point.x - this.start.x;
+			const dy = point.y - this.start.y;
+			if (dy !== 0) {
+				let slope = dx / dy;
+				slope = Math.round(slope);
+				if (Math.abs(slope) <= 1) {
+					x = this.start.x + dy * slope;
+					y = this.start.y + dy;
+				} else {
+					x = this.start.x + dx;
+					y = this.start.y;
+				}
+			}
+		}
+		if (this.altPressed) {
+			this.attr("x1", this.start.x * 2 - x);
+			this.attr("y1", this.start.y * 2 - y);
+			this.attr("x2", x);
+			this.attr("y2", y);
+		} else {
+			this.attr("x1", this.start.x);
+			this.attr("y1", this.start.y);
+			this.attr("x2", x);
+			this.attr("y2", y);
+		}
+		return true;
+	}
+	onEnd() {
+		const path = this.el;
+		this.el = null;
+		if (!path) return false;
+		try {
+			if (path.getTotalLength() < 5) return false;
+		} catch {
+			return false;
+		}
+		return true;
+	}
+};
+
+//#endregion
+//#region src/models/rect.ts
+var RectModel = class extends BaseModel {
+	onStart(point) {
+		this.el = this.createElement("rect");
+		if (this.brush.cornerRadius) {
+			this.attr("rx", this.brush.cornerRadius);
+			this.attr("ry", this.brush.cornerRadius);
+		}
+		this.attr("x", point.x);
+		this.attr("y", point.y);
+		return this.el;
+	}
+	onMove(point) {
+		if (!this.el || !this.start) return false;
+		let [dx, sx] = splitNum(point.x - this.start.x);
+		let [dy, sy] = splitNum(point.y - this.start.y);
+		if (this.shiftPressed) {
+			const d = Math.min(dx, dy);
+			dx = d;
+			dy = d;
+		}
+		if (this.altPressed) {
+			this.attr("x", this.start.x - dx);
+			this.attr("y", this.start.y - dy);
+			this.attr("width", dx * 2);
+			this.attr("height", dy * 2);
+		} else {
+			const [x1, x2] = [this.start.x, this.start.x + dx * sx].sort(numSort);
+			const [y1, y2] = [this.start.y, this.start.y + dy * sy].sort(numSort);
+			this.attr("x", x1);
+			this.attr("y", y1);
+			this.attr("width", x2 - x1);
+			this.attr("height", y2 - y1);
+		}
+		return true;
+	}
+	onEnd() {
+		const path = this.el;
+		this.el = null;
+		if (!path) return false;
+		try {
+			if (!path.getTotalLength()) return false;
+		} catch {
+			return false;
+		}
+		return true;
+	}
+};
+
+//#endregion
+//#region ../../node_modules/.pnpm/perfect-freehand@1.2.2/node_modules/perfect-freehand/dist/esm/index.mjs
+function $(e, t, u, x = (h) => h) {
+	return e * x(.5 - t * (.5 - u));
+}
+function se(e) {
+	return [-e[0], -e[1]];
+}
+function l(e, t) {
+	return [e[0] + t[0], e[1] + t[1]];
+}
+function a(e, t) {
+	return [e[0] - t[0], e[1] - t[1]];
+}
+function b(e, t) {
+	return [e[0] * t, e[1] * t];
+}
+function he(e, t) {
+	return [e[0] / t, e[1] / t];
+}
+function R(e) {
+	return [e[1], -e[0]];
+}
+function B(e, t) {
+	return e[0] * t[0] + e[1] * t[1];
+}
+function ue(e, t) {
+	return e[0] === t[0] && e[1] === t[1];
+}
+function ge(e) {
+	return Math.hypot(e[0], e[1]);
+}
+function de(e) {
+	return e[0] * e[0] + e[1] * e[1];
+}
+function A(e, t) {
+	return de(a(e, t));
+}
+function G(e) {
+	return he(e, ge(e));
+}
+function ie(e, t) {
+	return Math.hypot(e[1] - t[1], e[0] - t[0]);
+}
+function L(e, t, u) {
+	let x = Math.sin(u), h = Math.cos(u), y = e[0] - t[0], n = e[1] - t[1], f = y * h - n * x, d = y * x + n * h;
+	return [f + t[0], d + t[1]];
+}
+function K(e, t, u) {
+	return l(e, b(a(t, e), u));
+}
+function ee(e, t, u) {
+	return l(e, b(t, u));
+}
+var { min: C, PI: xe } = Math, pe = .275, V = xe + 1e-4;
+function ce(e, t = {}) {
+	let { size: u = 16, smoothing: x = .5, thinning: h = .5, simulatePressure: y = !0, easing: n = (r) => r, start: f = {}, end: d = {}, last: D$1 = !1 } = t, { cap: S = !0, easing: j = (r) => r * (2 - r) } = f, { cap: q = !0, easing: c = (r) => --r * r * r + 1 } = d;
+	if (e.length === 0 || u <= 0) return [];
+	let p = e[e.length - 1].runningLength, g = f.taper === !1 ? 0 : f.taper === !0 ? Math.max(u, p) : f.taper, T = d.taper === !1 ? 0 : d.taper === !0 ? Math.max(u, p) : d.taper, te = Math.pow(u * x, 2), _ = [], M = [], H = e.slice(0, 10).reduce((r, i) => {
+		let o = i.pressure;
+		if (y) {
+			let s = C(1, i.distance / u);
+			o = C(1, r + (C(1, 1 - s) - r) * (s * pe));
+		}
+		return (r + o) / 2;
+	}, e[0].pressure), m = $(u, h, e[e.length - 1].pressure, n), U, X = e[0].vector, z = e[0].point, F = z, O = z, E = F, J = !1;
+	for (let r = 0; r < e.length; r++) {
+		let { pressure: i } = e[r], { point: o, vector: s, distance: W, runningLength: I } = e[r];
+		if (r < e.length - 1 && p - I < 3) continue;
+		if (h) {
+			if (y) {
+				let v = C(1, W / u), Z = C(1, 1 - v);
+				i = C(1, H + (Z - H) * (v * pe));
+			}
+			m = $(u, h, i, n);
+		} else m = u / 2;
+		U === void 0 && (U = m);
+		let le = I < g ? j(I / g) : 1, fe = p - I < T ? c((p - I) / T) : 1;
+		m = Math.max(.01, m * Math.min(le, fe));
+		let re = (r < e.length - 1 ? e[r + 1] : e[r]).vector, Y = r < e.length - 1 ? B(s, re) : 1, be = B(s, X) < 0 && !J, ne = Y !== null && Y < 0;
+		if (be || ne) {
+			let v = b(R(X), m);
+			for (let Z = 1 / 13, w = 0; w <= 1; w += Z) O = L(a(o, v), o, V * w), _.push(O), E = L(l(o, v), o, V * -w), M.push(E);
+			z = O, F = E, ne && (J = !0);
+			continue;
+		}
+		if (J = !1, r === e.length - 1) {
+			let v = b(R(s), m);
+			_.push(a(o, v)), M.push(l(o, v));
+			continue;
+		}
+		let oe = b(R(K(re, s, Y)), m);
+		O = a(o, oe), (r <= 1 || A(z, O) > te) && (_.push(O), z = O), E = l(o, oe), (r <= 1 || A(F, E) > te) && (M.push(E), F = E), H = i, X = s;
+	}
+	let P = e[0].point.slice(0, 2), k = e.length > 1 ? e[e.length - 1].point.slice(0, 2) : l(e[0].point, [1, 1]), Q = [], N = [];
+	if (e.length === 1) {
+		if (!(g || T) || D$1) {
+			let r = ee(P, G(R(a(P, k))), -(U || m)), i = [];
+			for (let o = 1 / 13, s = o; s <= 1; s += o) i.push(L(r, P, V * 2 * s));
+			return i;
+		}
+	} else {
+		if (!(g || T && e.length === 1)) if (S) for (let i = 1 / 13, o = i; o <= 1; o += i) {
+			let s = L(M[0], P, V * o);
+			Q.push(s);
+		}
+		else {
+			let i = a(_[0], M[0]), o = b(i, .5), s = b(i, .51);
+			Q.push(a(P, o), a(P, s), l(P, s), l(P, o));
+		}
+		let r = R(se(e[e.length - 1].vector));
+		if (T || g && e.length === 1) N.push(k);
+		else if (q) {
+			let i = ee(k, r, m);
+			for (let o = 1 / 29, s = o; s < 1; s += o) N.push(L(i, k, V * 3 * s));
+		} else N.push(l(k, b(r, m)), l(k, b(r, m * .99)), a(k, b(r, m * .99)), a(k, b(r, m)));
+	}
+	return _.concat(N, M.reverse(), Q);
+}
+function me(e, t = {}) {
+	var q;
+	let { streamline: u = .5, size: x = 16, last: h = !1 } = t;
+	if (e.length === 0) return [];
+	let y = .15 + (1 - u) * .85, n = Array.isArray(e[0]) ? e : e.map(({ x: c, y: p, pressure: g = .5 }) => [
+		c,
+		p,
+		g
+	]);
+	if (n.length === 2) {
+		let c = n[1];
+		n = n.slice(0, -1);
+		for (let p = 1; p < 5; p++) n.push(K(n[0], c, p / 4));
+	}
+	n.length === 1 && (n = [...n, [...l(n[0], [1, 1]), ...n[0].slice(2)]]);
+	let f = [{
+		point: [n[0][0], n[0][1]],
+		pressure: n[0][2] >= 0 ? n[0][2] : .25,
+		vector: [1, 1],
+		distance: 0,
+		runningLength: 0
+	}], d = !1, D$1 = 0, S = f[0], j = n.length - 1;
+	for (let c = 1; c < n.length; c++) {
+		let p = h && c === j ? n[c].slice(0, 2) : K(S.point, n[c], y);
+		if (ue(S.point, p)) continue;
+		let g = ie(p, S.point);
+		if (D$1 += g, c < j && !d) {
+			if (D$1 < x) continue;
+			d = !0;
+		}
+		S = {
+			point: p,
+			pressure: n[c][2] >= 0 ? n[c][2] : .5,
+			vector: G(a(S.point, p)),
+			distance: g,
+			runningLength: D$1
+		}, f.push(S);
+	}
+	return f[0].vector = ((q = f[1]) == null ? void 0 : q.vector) || [0, 0], f;
+}
+function ae(e, t = {}) {
+	return ce(me(e, t), t);
+}
+
+//#endregion
+//#region src/models/stylus.ts
+var StylusModel = class StylusModel extends BaseModel {
+	constructor(..._args) {
+		super(..._args);
+		this.points = [];
+	}
+	onStart(point) {
+		this.el = document.createElementNS("http://www.w3.org/2000/svg", "path");
+		this.points = [point];
+		this.attr("fill", this.brush.color);
+		this.attr("d", this.getSvgData(this.points));
+		return this.el;
+	}
+	onMove(point) {
+		if (!this.el) this.onStart(point);
+		if (this.points[this.points.length - 1] !== point) this.points.push(point);
+		this.attr("d", this.getSvgData(this.points));
+		return true;
+	}
+	onEnd() {
+		const path = this.el;
+		this.el = null;
+		if (!path) return false;
+		return true;
+	}
+	getSvgData(points) {
+		return StylusModel.getSvgData(points, this.brush);
+	}
+	static getSvgData(points, brush) {
+		const stroke = ae(points, {
+			size: brush.size,
+			thinning: .9,
+			simulatePressure: false,
+			start: { taper: 5 },
+			end: { taper: 5 },
+			...brush.stylusOptions
+		});
+		if (!stroke.length) return "";
+		const d = stroke.reduce((acc, [x0, y0], i, arr) => {
+			const [x1, y1] = arr[(i + 1) % arr.length];
+			acc.push(x0, y0, (x0 + x1) / 2, (y0 + y1) / 2);
+			return acc;
+		}, [
+			"M",
+			...stroke[0],
+			"Q"
+		]);
+		d.push("Z");
+		return d.map((i) => typeof i === "number" ? i.toFixed(2) : i).join(" ");
+	}
+};
+
+//#endregion
+//#region src/models/index.ts
+function createModels(drauu) {
+	return {
+		draw: new DrawModel(drauu),
+		stylus: new StylusModel(drauu),
+		line: new LineModel(drauu),
+		rectangle: new RectModel(drauu),
+		ellipse: new EllipseModel(drauu),
+		eraseLine: new EraserModel(drauu)
+	};
+}
+
+//#endregion
+//#region src/drauu.ts
+var Drauu = class {
+	constructor(options = {}) {
+		this.options = options;
+		this.el = null;
+		this.svgPoint = null;
+		this.eventEl = null;
+		this.shiftPressed = false;
+		this.altPressed = false;
+		this.drawing = false;
+		this._emitter = createNanoEvents();
+		this._originalPointerId = null;
+		this._models = createModels(this);
+		this._opStack = [];
+		this._opIndex = 0;
+		this._disposables = [];
+		this._elements = [];
+		if (!this.options.brush) this.options.brush = {
+			color: "black",
+			size: 3,
+			mode: "stylus"
+		};
+		if (options.el) this.mount(options.el, options.eventTarget, options.window);
+	}
+	get model() {
+		return this._models[this.mode];
+	}
+	get mounted() {
+		return !!this.el;
+	}
+	get mode() {
+		return this.options.brush.mode || "stylus";
+	}
+	set mode(v) {
+		this._models[this.mode].onUnselected();
+		this.options.brush.mode = v;
+		this.model.onSelected(this.el);
+	}
+	get brush() {
+		return this.options.brush;
+	}
+	set brush(v) {
+		this.options.brush = v;
+	}
+	resolveSelector(selector) {
+		if (typeof selector === "string") return document.querySelector(selector);
+		else return selector || null;
+	}
+	mount(el, eventEl, listenWindow = window) {
+		if (this.el) throw new Error("[drauu] already mounted, unmount previous target first");
+		this.el = this.resolveSelector(el);
+		if (!this.el) throw new Error("[drauu] target element not found");
+		if (this.el.tagName.toLocaleLowerCase() !== "svg") throw new Error("[drauu] can only mount to a SVG element");
+		if (!this.el.createSVGPoint) throw new Error("[drauu] SVG element must be create by document.createElementNS('http://www.w3.org/2000/svg', 'svg')");
+		this.svgPoint = this.el.createSVGPoint();
+		const target = this.resolveSelector(eventEl) || this.el;
+		const start = this.eventStart.bind(this);
+		const move = this.eventMove.bind(this);
+		const end = this.eventEnd.bind(this);
+		const keyboard = this.eventKeyboard.bind(this);
+		const touchMove = this.touchMove.bind(this);
+		target.addEventListener("pointerdown", start, { passive: false });
+		listenWindow.addEventListener("pointermove", move, { passive: false });
+		listenWindow.addEventListener("pointerup", end, { passive: false });
+		listenWindow.addEventListener("pointercancel", end, { passive: false });
+		listenWindow.addEventListener("keydown", keyboard, false);
+		listenWindow.addEventListener("keyup", keyboard, false);
+		listenWindow.addEventListener("touchmove", touchMove, { passive: false });
+		this._disposables.push(() => {
+			target.removeEventListener("pointerdown", start);
+			listenWindow.removeEventListener("pointermove", move);
+			listenWindow.removeEventListener("pointerup", end);
+			listenWindow.removeEventListener("pointercancel", end);
+			listenWindow.removeEventListener("keydown", keyboard, false);
+			listenWindow.removeEventListener("keyup", keyboard, false);
+			listenWindow.removeEventListener("touchmove", touchMove);
+		});
+		this._emitter.emit("mounted");
+	}
+	unmount() {
+		this._disposables.forEach((fn) => fn());
+		this._disposables.length = 0;
+		this._elements.length = 0;
+		this.el = null;
+		this._emitter.emit("unmounted");
+	}
+	on(type, fn) {
+		return this._emitter.on(type, fn);
+	}
+	undo() {
+		if (!this.canUndo() || this.drawing) return false;
+		this._opStack[--this._opIndex].undo();
+		this._emitter.emit("changed");
+		return true;
+	}
+	redo() {
+		if (!this.canRedo() || this.drawing) return false;
+		this._opStack[this._opIndex++].redo();
+		this._emitter.emit("changed");
+		return true;
+	}
+	canRedo() {
+		return this._opIndex < this._opStack.length;
+	}
+	canUndo() {
+		return this._opIndex > 0;
+	}
+	eventMove(event) {
+		if (!this.acceptsInput(event) || !this.drawing) return;
+		if (this.model._eventMove(event)) {
+			event.stopPropagation();
+			event.preventDefault();
+			this._emitter.emit("changed");
+		}
+	}
+	eventStart(event) {
+		if (!this.acceptsInput(event)) return;
+		event.stopPropagation();
+		event.preventDefault();
+		if (this._currentNode) this.cancel();
+		this.drawing = true;
+		this._originalPointerId = event.pointerId;
+		this._emitter.emit("start");
+		this._currentNode = this.model._eventDown(event);
+		if (this._currentNode && this.mode !== "eraseLine") this.el.appendChild(this._currentNode);
+		this._emitter.emit("changed");
+	}
+	eventEnd(event) {
+		if (!this.acceptsInput(event) || !this.drawing) return;
+		const result = this.model._eventUp(event);
+		if (!result) this.cancel();
+		else if (result === true) {
+			const el = this._currentNode;
+			if (el) {
+				this._appendNode(el);
+				this.commit({
+					undo: () => this._removeNode(el),
+					redo: () => this._restoreNode(el)
+				});
+			}
+		} else this.commit(result);
+		this.drawing = false;
+		this._emitter.emit("end");
+		this._emitter.emit("changed");
+		this._originalPointerId = null;
+	}
+	touchMove(event) {
+		/**
+		* If you use an apple pencil on iPadOS and have "Scribble" enabled, you need to cancel the move event,
+		* otherwise drauu will only register every second stroke.
+		*/
+		if (Array.from(event.touches).some((touch) => touch.touchType === "stylus" && touch.identifier === this._originalPointerId)) event.preventDefault();
+	}
+	acceptsInput(event) {
+		return (!this.options.acceptsInputTypes || this.options.acceptsInputTypes.includes(event.pointerType)) && !(this._originalPointerId && this._originalPointerId !== event.pointerId);
+	}
+	eventKeyboard(event) {
+		if (this.shiftPressed === event.shiftKey && this.altPressed === event.altKey) return;
+		this.shiftPressed = event.shiftKey;
+		this.altPressed = event.altKey;
+		if (this.model.point) {
+			if (this.model.onMove(this.model.point)) this._emitter.emit("changed");
+		}
+	}
+	commit(op) {
+		this._opStack.length = this._opIndex;
+		this._opStack.push(op);
+		this._opIndex++;
+		const node = this._currentNode;
+		this._currentNode = void 0;
+		this._emitter.emit("committed", node);
+	}
+	clear() {
+		this._opStack.length = 0;
+		this._opIndex = 0;
+		this._elements = [];
+		this.cancel();
+		this.el.innerHTML = "";
+		this._emitter.emit("changed");
+	}
+	cancel() {
+		if (this._currentNode) {
+			this.el.removeChild(this._currentNode);
+			this._currentNode = void 0;
+			this._emitter.emit("canceled");
+		}
+	}
+	dump() {
+		return this.el.innerHTML;
+	}
+	load(svg) {
+		this.clear();
+		this.el.innerHTML = svg;
+	}
+	/**
+	* @internal
+	*/
+	_appendNode(node) {
+		const last = this._elements.at(-1);
+		if (last) last.after(node);
+		else this.el.append(node);
+		const index = this._elements.push(node) - 1;
+		node.dataset.drauu_index = index.toString();
+	}
+	/**
+	* @internal
+	*/
+	_removeNode(node) {
+		node.remove();
+		this._elements[+node.dataset.drauu_index] = null;
+	}
+	/**
+	* @internal
+	*/
+	_restoreNode(node) {
+		const index = +node.dataset.drauu_index;
+		this._elements[index] = node;
+		for (let i = index - 1; i >= 0; i--) {
+			const last = this._elements[i];
+			if (last) {
+				last.after(node);
+				return;
+			}
+		}
+		this.el.prepend(node);
+	}
+};
+function createDrauu(options) {
+	return new Drauu(options);
+}
+
+//#endregion
+window.Drauu = { createDrauu: createDrauu, Drauu: Drauu };
+})();</script>
+<script data-stage="#deck">
+/* ============ Доска: drauu поверх активного слайда ============ */
+(function(){
+  if(!window.Drauu)return;
+  var W=1280,H=720,NS='http://www.w3.org/2000/svg';
+  var stage=document.querySelector(document.currentScript.dataset.stage),bar=document.getElementById('kb-bar'),tog=document.getElementById('kb-toggle');
+  var slides=[].slice.call(document.querySelectorAll('.slide'));
+  var sheet=document.createElement('div'),laser=document.createElement('div');
+  sheet.id='kb-sheet';sheet.hidden=true;laser.id='kb-laser';laser.hidden=true;
+  stage.appendChild(sheet);stage.appendChild(laser);
+  var TOOLS={
+    pen:   function(c){return {mode:'stylus',color:c,size:6}},
+    marker:function(c){return {mode:'draw',color:c+'66',size:26}},
+    arrow: function(c){return {mode:'line',color:c,size:6,arrowEnd:true}},
+    rect:  function(c){return {mode:'rectangle',color:c,size:5,cornerRadius:11}},
+    eraser:function(c){return {mode:'eraseLine',color:c,size:6}}
+  };
+  /* слои: слайд (стирается при перелистывании) и «лист» (один на презентацию) */
+  var layers={},L=null,d=null,active=false,tool='pen',color='#E04848',shown=-1;
+  function idx(){for(var i=0;i<slides.length;i++)if(slides[i].classList.contains('active'))return i;return 0;}
+  function key(){return sheet.hidden?String(idx()):'sheet';}
+  function brush(){return TOOLS[tool==='laser'?'pen':tool](color);}
+  function layer(k){
+    if(!layers[k]){
+      var s=document.createElementNS(NS,'svg');
+      s.setAttribute('class','kb-svg');s.setAttribute('viewBox','0 0 '+W+' '+H);s.setAttribute('preserveAspectRatio','none');
+      s.setAttribute('aria-label','Рисунки');s.setAttribute('hidden','');
+      stage.insertBefore(s,laser);
+      var inst=Drauu.createDrauu({el:s,brush:brush()});
+      inst.on('changed',sync);inst.on('committed',sync);
+      layers[k]={k:k,svg:s,d:inst};
+    }
+    return layers[k];
+  }
+  function drop(k){var x=layers[k];if(!x)return;x.d.unmount();x.svg.remove();delete layers[k];}
+  function restore(){
+    var k=key();
+    for(var x in layers){if(x===k)layers[x].svg.removeAttribute('hidden');else layers[x].svg.setAttribute('hidden','');}
+    L=layer(k);L.svg.removeAttribute('hidden');d=L.d;
+    var br=brush();d.mode=br.mode;d.brush=br;sync();
+  }
+  function sync(){
+    if(!d)return;
+    bar.querySelector('[data-act="undo"]').disabled=!d.canUndo();
+    bar.querySelector('[data-act="redo"]').disabled=!d.canRedo();
+    bar.querySelector('[data-act="sheet"]').setAttribute('aria-pressed',String(!sheet.hidden));
+  }
+  function applyClasses(){
+    stage.className=stage.className.replace(/\bkb-t-\w+/g,'').replace(/\bkb-on\b/g,'').replace(/\s+/g,' ').trim();
+    if(active)stage.classList.add('kb-on','kb-t-'+tool);
+  }
+  function setTool(t){
+    tool=t;
+    [].forEach.call(bar.querySelectorAll('[data-tool]'),function(b){b.setAttribute('aria-pressed',String(b.dataset.tool===t));});
+    applyClasses();
+    if(t!=='laser'&&d){var b=TOOLS[t](color);d.mode=b.mode;d.brush=b;laser.hidden=true;}
+  }
+  function setColor(c){
+    color=c;
+    [].forEach.call(bar.querySelectorAll('[data-color]'),function(b){b.setAttribute('aria-pressed',String(b.dataset.color===c));});
+    if(tool==='laser'||tool==='eraser')setTool('pen');else setTool(tool);
+  }
+  function setActive(v){
+    active=v;document.body.classList.toggle('kb-active',v);applyClasses();
+    bar.hidden=!v;tog.setAttribute('aria-pressed',String(v));
+    if(!v){laser.hidden=true;if(!sheet.hidden){sheet.hidden=true;restore();}}
+  }
+  /* сцена масштабируется целиком: координаты считаем по её положению на экране */
+  function fixScale(){if(!d)return;var r=d.el.getBoundingClientRect();if(!r.width)return;
+    d.options.coordinateTransform=false;d.options.cssZoom=1;d.options.coordinateScale=W/r.width;}
+  document.addEventListener('pointerdown',fixScale,true);
+  /* смена слайда: рисунки прошлого слайда стираются, лист закрывается */
+  function onSlide(){var i=idx();if(i===shown)return;shown=i;
+    for(var x in layers)if(x!=='sheet')drop(x);
+    sheet.hidden=true;restore();}
+  var mo=new MutationObserver(onSlide);
+  slides.forEach(function(s){mo.observe(s,{attributes:true,attributeFilter:['class']});});
+  tog.addEventListener('click',function(){setActive(!active);tog.blur();});
+  bar.addEventListener('click',function(e){
+    var b=e.target.closest('button');if(!b)return;
+    if(b.dataset.tool)setTool(b.dataset.tool);
+    else if(b.dataset.color)setColor(b.dataset.color);
+    else if(b.dataset.act==='undo'){d.undo();sync();}
+    else if(b.dataset.act==='redo'){d.redo();sync();}
+    else if(b.dataset.act==='clear'){d.clear();sync();}
+    else if(b.dataset.act==='sheet'){sheet.hidden=!sheet.hidden;restore();}
+    else if(b.dataset.act==='close')setActive(false);
+    b.blur();
+  });
+  /* указка: точка в координатах сцены */
+  document.addEventListener('pointermove',function(e){
+    if(!active||tool!=='laser')return;
+    var r=stage.getBoundingClientRect(),z=r.width/W;
+    var x=(e.clientX-r.left)/z,y=(e.clientY-r.top)/z;
+    if(x<0||y<0||x>W||y>H){laser.hidden=true;return;}
+    laser.style.transform='translate('+x+'px,'+y+'px)';laser.hidden=false;
+  });
+  /* клавиши: D — доска, Esc — закрыть только доску, Ctrl+Z / Ctrl+Shift+Z / Ctrl+Y */
+  document.addEventListener('keydown',function(e){
+    var t=e.target;if(t&&(t.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)))return;
+    if(document.querySelector('dialog[open]'))return;
+    if(e.code==='KeyD'&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!e.repeat){e.preventDefault();setActive(!active);return;}
+    if(!active)return;
+    if(e.key==='Escape'||e.key==='Esc'){setActive(false);e.stopImmediatePropagation();return;}
+    if((e.ctrlKey||e.metaKey)&&e.code==='KeyZ'){e.preventDefault();if(e.shiftKey)d.redo();else d.undo();sync();}
+    else if((e.ctrlKey||e.metaKey)&&e.code==='KeyY'){e.preventDefault();d.redo();sync();}
+  },true);
+  shown=idx();restore();setColor(color);setTool('pen');
+})();
+</script>
+</body></html>

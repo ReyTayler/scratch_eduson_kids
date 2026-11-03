@@ -1,0 +1,21 @@
+{
+  "slides": 24,
+  "minutes": 60,
+  "overflow": [],
+  "page_errors": [],
+  "checks": [
+    "slide-only default",
+    "no sidebar or iframe",
+    "opt-in notes button",
+    "N and Escape",
+    "content menu",
+    "note size",
+    "closed notes after reload",
+    "1280x720 stage",
+    "embedded fonts",
+    "narrow notes",
+    "separate public file without notes",
+    "no Scratch or arrow teaching examples",
+    "board: D, draw, undo, redo, clear on slide change, sheet, laser, Escape"
+  ]
+}

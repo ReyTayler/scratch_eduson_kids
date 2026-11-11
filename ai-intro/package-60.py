@@ -5,7 +5,7 @@ R=Path(__file__).resolve().parent
 target=R.parent/'Введение в нейросети — 60 минут.zip'
 files=['dist/index.html','dist/audience.html','Текст урока.md','Сценарий урока.html','Сценарий урока.md','scenario-60.py',
  'lesson-60.json','author-60.py','build-60.py','slide-art-60.py','README.md','web-60.css','web-60.js',
- 'designbook-base.css','designbook-slides.css','designbook-fonts.css',
+ 'designbook-base.css','designbook-slides.css','designbook-fonts.css','interactive.css',
  'board.py','vendor/drauu-core-1.0.0.mjs','vendor/drauu-LICENSE.txt','designbook-sprite.svg','designbook-waves.svg','designbook-source.json','package-60.py','check-60.py']
 with ZipFile(target,'w',ZIP_DEFLATED) as z:
     for name in files: z.write(R/name,name)

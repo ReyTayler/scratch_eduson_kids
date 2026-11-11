@@ -101,4 +101,9 @@
 .audience .hw-reply,.audience .hw-check{font:500 22px/1.35 var(--f-body);margin:12px 0 0}
 .audience .hw-no .hw-check{color:#7A2E2E}.audience .hw-ok .hw-check{color:#0B5B39}
 .audience .kind-home-example .visual{gap:12px}
+/* Ответ и пояснение не занимают места, пока их не показали: блок вопроса компактный и по центру. */
+.audience .qa-answer:not(.on),.audience .reply:not(.on),.audience .qz-fb:not(.show){display:none}
+.audience .lesson-question.qa{align-items:center}
+.audience .kind-exit .steps li.tap{align-items:center}
+.audience .kind-exit .steps li.tap>div{justify-content:center}
 @media print{[data-show],.audience .qz-fb{visibility:visible!important}}

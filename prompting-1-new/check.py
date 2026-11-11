@@ -50,8 +50,9 @@ with sync_playwright() as p:
             if q.locator('.qz-fb').count(): assert q.locator('.qz-fb').is_hidden()
             right.click(); assert 'is-ok' in right.get_attribute('class') and 'is-no' not in wrong.get_attribute('class')
             if q.locator('.qz-fb').count(): assert q.locator('.qz-fb').is_visible()
+            wrong.click(); assert 'is-ok' in right.get_attribute('class') and 'is-no' not in wrong.get_attribute('class'), f'слайд {i+1}: верный ответ стёрт'
         # нажатие на элемент показывает скрытое
-        hid = pg.evaluate("()=>[...document.querySelectorAll('.slide:not([hidden]) [data-show]')].every(x=>getComputedStyle(x).visibility==='hidden')")
+        hid = pg.evaluate("()=>[...document.querySelectorAll('.slide:not([hidden]) [data-show]')].every(x=>(getComputedStyle(x).visibility==='hidden'||!x.getClientRects().length))")
         assert hid, f'слайд {i+1}: скрытое видно сразу'
         # у каждого раскрытия видна метка «Нажмите», после нажатия она исчезает
         if taps:
@@ -62,8 +63,8 @@ with sync_playwright() as p:
         for ti in range(taps):
             cur.locator('.tap').nth(ti).click(force=True)
         if taps:
-            assert pg.evaluate("()=>[...document.querySelectorAll('.slide:not([hidden]) [data-hide]')].every(x=>getComputedStyle(x).visibility==='hidden')"), f'слайд {i+1}: метка осталась'
-        ok = pg.evaluate("()=>[...document.querySelectorAll('.slide:not([hidden]) [data-show]')].every(x=>getComputedStyle(x).visibility==='visible')")
+            assert pg.evaluate("()=>[...document.querySelectorAll('.slide:not([hidden]) [data-hide]')].every(x=>(getComputedStyle(x).visibility==='hidden'||!x.getClientRects().length))"), f'слайд {i+1}: метка осталась'
+        ok = pg.evaluate("()=>[...document.querySelectorAll('.slide:not([hidden]) [data-show]')].every(x=>(getComputedStyle(x).visibility==='visible'&&x.getClientRects().length>0))")
         assert ok, f'слайд {i+1}: нажатие не сработало'
         if opts or taps: pg.screenshot(path=str(Q/f'slide-{i+1:02}-open.png'))
         m = pg.evaluate(MEASURE)
@@ -82,6 +83,9 @@ with sync_playwright() as p:
     pg.locator('.slide:not([hidden]) .qz-opt').first.click()
     pg.keyboard.press('ArrowRight'); pg.wait_for_function('!document.querySelectorAll(".slide")[4].hidden')
     pg.keyboard.press('ArrowLeft'); pg.wait_for_function('!document.querySelectorAll(".slide")[3].hidden')
+    # стрелки работают сразу после нажатия кнопки «→» на панели
+    pg.mouse.move(800, 860); pg.locator('#next').click(); h = pg.evaluate('location.hash')
+    pg.keyboard.press('ArrowRight'); assert pg.evaluate('location.hash') != h, 'стрелка после кнопки не работает'
     # пробел ничего не делает
     before = pg.evaluate('location.hash'); pg.keyboard.press('Space'); assert pg.evaluate('location.hash') == before
     # заметки, копирование, запасной ответ

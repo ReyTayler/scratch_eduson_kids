@@ -8,6 +8,6 @@ __pycache__/
 # Копии чужого дизайнбука и служебные материалы, в открытый доступ не идут
 research/
 
-# Настройки прежнего хостинга и старая история ai-intro
-ai-intro/.openai/
-ai-intro/.git-old/
+# Снимки проверок: их создают check-60.py и check.py
+ai-intro/qa-60/
+prompting-1-new/qa/

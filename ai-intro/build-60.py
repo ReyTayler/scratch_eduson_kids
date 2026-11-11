@@ -29,14 +29,27 @@ def orbit(full=True):
     <svg class="sl-ico" viewBox="0 0 100 100" style="left:1045px;top:540px;width:110px;height:110px;transform:rotate(8deg)"><use href="#ek-i-gem"/></svg></div>'''
 accents={2:'60 минут',3:'урока',4:'нейросети',5:'и нейросеть',6:'на примерах',7:'обучение',8:'цвет?',9:'не хватает?',10:'догадкой',11:'новый текст?',12:'в чат?',14:'порядок работы',15:'Алису AI',16:'запрос',17:'ответ',18:'ответ',19:'сочинить',20:'свой запрос',21:'без подсказки',22:'урока',23:'своё',24:'выглядеть'}
 labels={'agenda':'Agenda · план занятия','goals':'Цель · что будет в конце','results':'Итоги · что получилось','home':'Домашнее задание · около 15 минут','home-example':'Домашнее задание · пример'}
+# Интерактив прямо на слайде: кнопки-ответы и вопросы с меткой «Нажмите». Пошагового показа нет.
+QUIZ={7:[('Хватит',0),('Не хватит',1)],12:[('Нужен',0),('Не нужен',1)],14:[('1, 2, 3',0),('2, 3, 1',1),('3, 1, 2',0)]}
+CHIP='<svg viewBox="0 0 14 18" aria-hidden="true"><path d="M0 0 L0 15 L4.2 11.2 L7 17.4 L9.6 16.2 L6.8 10.2 L12.6 10.2 Z" fill="#fff"/></svg>Нажмите'
 sections=[]
 for i,s in enumerate(slides):
     lead='' if s['kind'] in ['prompt','response','revision','practice','own','agenda','goals','results'] else f'<p class="lead">{e(s["lead"])}</p>'
-    answer=f'<div class="answer ek-feedback ek-feedback--ok is-on" aria-live="polite" hidden>{e(s["answer"])}</div>' if s['answer'] else ''
+    answer=''
     cls='slide--content'
     title=e(s['title'])
     if i+1 in accents: title=title.replace(e(accents[i+1]),'<span class="acc">'+e(accents[i+1])+'</span>')
-    q=f'<div class="lesson-question ek-note"><p>{e(s["question"])}</p></div>' if s['question'] and s['kind']!='results' else ''
+    q=''
+    if s['question'] and s['kind']!='results':
+        if s['answer'] and i+1 in QUIZ:
+            opts=''.join(f'<button type="button" class="qz-opt"{" data-ok=1" if ok else ""}>{e(a)}</button>' for a,ok in QUIZ[i+1])
+            q=f'<div class="lesson-question ek-note qz qz-line"><div class="qz-text"><p class="qz-q">{e(s["question"])}</p><p class="qz-fb">{e(s["answer"])}</p></div><div class="qz-opts">{opts}</div></div>'
+        elif s['answer'] and s['kind']=='exit':
+            q=f'<div class="lesson-question ek-note"><p>{e(s["question"])}</p></div>'
+        elif s['answer']:
+            q=f'<div class="lesson-question ek-note qa tap" data-tap="a" role="button" tabindex="0"><div class="qa-text"><p>{e(s["question"])}</p><p class="qa-answer" data-show="a">{e(s["answer"])}</p></div><span class="tap-chip" data-hide="a">{CHIP}</span></div>'
+        else:
+            q=f'<div class="lesson-question ek-note"><p>{e(s["question"])}</p></div>'
     if s['kind']=='cover':
         cls='slide--violet'
         chips=''.join(f'<span class="chip">{e(a)}</span>' for a,b in s['cards'])
@@ -51,7 +64,13 @@ for i,s in enumerate(slides):
         is_waves=s['kind'] in ['exit','feedback']
         label=labels.get(s['kind']) or f'{e(s["block"])} · {s["minutes"]} мин'
         label=f'<span class="badge badge--sm badge--violet">{label}</span>' if is_window else f'<div class="q-label">{label}</div>'
-        content=f'{label}<h2>{title}</h2>{lead}<div class="visual">{art(s)}</div>{q}'
+        visual=art(s)
+        if s['kind']=='exit' and s['answer']:
+            # Каждый вопрос нажимается отдельно, ответ появляется под ним.
+            replies=[x.strip() for x in re.split(r'\s*\d\.\s+',s['answer']) if x.strip()]
+            assert len(replies)==len(s['cards']),'ответов столько же, сколько вопросов'
+            visual='<ol class="steps">'+''.join(f'<li class="tap" data-tap="{k}" role="button" tabindex="0"><div>{e(b)}<em class="reply" data-show="{k}">{e(r)}</em></div><span class="tap-chip" data-hide="{k}">{CHIP}</span></li>' for k,((a,b),r) in enumerate(zip(s['cards'],replies),1))+'</ol>'
+        content=f'{label}<h2>{title}</h2>{lead}<div class="visual">{visual}</div>{q}'
         if is_window:
             cls='slide--violet slide--window'
             body=orbit(False)+f'<div class="lesson-window">{chrome}<div class="sl-body">{content}</div></div><span class="sl-pagenum">{i+1}</span>'
@@ -59,7 +78,7 @@ for i,s in enumerate(slides):
             decor=f'<div class="sl-waves" aria-hidden="true">{waves}</div>' if is_waves else '<div class="corner-decor" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#ek-i-star"/></svg></div>'
             body=decor+f'<div class="sl-body{ " wave-layout" if is_waves else ""}">{content}</div>'
     sections.append(f'<section class="slide {cls} kind-{s["kind"]}" data-index="{i}" data-page="{i+1}" aria-label="Слайд {i+1}: {e(s["title"])}" hidden>{body}{answer}</section>')
-css='\n'.join((R/f).read_text(encoding='utf-8') for f in ['designbook-fonts.css','designbook-base.css','web-60.css','designbook-slides.css'])
+css='\n'.join((R/f).read_text(encoding='utf-8') for f in ['designbook-fonts.css','designbook-base.css','web-60.css','designbook-slides.css','interactive.css'])
 js=(R/'web-60.js').read_text(encoding='utf-8')
 audience=f'''<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Введение в нейросети · Экран показа</title><style>{css}</style></head><body class="audience"><main class="stage" id="stage">{''.join(sections)}</main>{sprite}<script>{js}</script></body></html>'''
 (D/'audience.html').write_text(board.inject(audience,'#stage'),encoding='utf-8')
@@ -69,6 +88,6 @@ notes=''.join(f'<article class="speaker" data-index="{i}" hidden><h2>{e(s["title
 nav=''.join(f'<button class="jump" data-to="{i}"><span>{i+1:02}</span><span>{e(s["title"])}</span><small>{s["start"]:02}–{s["end"]:02}</small></button>' for i,s in enumerate(slides))
 public_data=[{k:s[k] for k in ['title','start','end','minutes','answer','kind','lead']} for s in slides]
 public_json=json.dumps(public_data,ensure_ascii=False).replace('</', '<'+chr(92)+'/')
-html=f'''<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Введение в нейросети · Eduson Kids</title><style>{css}</style></head><body class="audience lesson-deck"><main class="stage" id="stage">{''.join(sections)}</main><div class="deck-toolbar"><button id="notesBtn" aria-expanded="false" aria-controls="notesPanel">Преподавателю</button><button id="fullBtn" aria-label="Весь экран">⛶</button></div><nav class="deck-controls" aria-label="Управление слайдами"><button id="prev" aria-label="Предыдущий слайд">←</button><span id="counter" aria-live="polite"></span><button id="next" aria-label="Следующий слайд">→</button><button id="reveal" aria-pressed="false">Показать ответ</button></nav><aside id="notesPanel" class="speaker-panel" aria-label="Заметки преподавателя" hidden><header class="speaker-toolbar"><span>Преподавателю</span><div><button id="contentsBtn">Слайды</button><button id="fontDown" aria-label="Уменьшить шрифт заметок">А−</button><button id="fontUp" aria-label="Увеличить шрифт заметок">А+</button><button id="closeNotes" aria-label="Закрыть заметки">Закрыть ×</button></div></header><div id="notesScroll">{notes}</div><footer class="speaker-actions"><button id="copyPrompt" hidden>Скопировать запрос</button><button id="showFallback" hidden>Учебная исправленная версия</button><span id="copyStatus" role="status"></span></footer></aside><dialog id="contents"><div class="dialog-top"><h2>План урока · 60 минут</h2><button id="closeContents">Закрыть</button></div><nav>{nav}</nav></dialog><dialog id="fallback"><div class="dialog-top"><h2>Учебная исправленная версия</h2><button id="closeFallback">Закрыть</button></div><p class="fallback-text">Кошка — домашнее животное. Она хорошо видит в темноте. Кошки любят много спать.</p><p>Ровно три предложения, ответ про кошку. Это подготовленный текст, а не ответ сервиса.</p></dialog>{sprite}<script>const lessonData={public_json};</script><script>{js}</script></body></html>'''
+html=f'''<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Введение в нейросети · Eduson Kids</title><style>{css}</style></head><body class="audience lesson-deck"><main class="stage" id="stage">{''.join(sections)}</main><div class="deck-toolbar"><button id="notesBtn" aria-expanded="false" aria-controls="notesPanel">Преподавателю</button><button id="fullBtn" aria-label="Весь экран">⛶</button></div><nav class="deck-controls" aria-label="Управление слайдами"><button id="prev" aria-label="Предыдущий слайд">←</button><span id="counter" aria-live="polite"></span><button id="next" aria-label="Следующий слайд">→</button></nav><aside id="notesPanel" class="speaker-panel" aria-label="Заметки преподавателя" hidden><header class="speaker-toolbar"><span>Преподавателю</span><div><button id="contentsBtn">Слайды</button><button id="fontDown" aria-label="Уменьшить шрифт заметок">А−</button><button id="fontUp" aria-label="Увеличить шрифт заметок">А+</button><button id="closeNotes" aria-label="Закрыть заметки">Закрыть ×</button></div></header><div id="notesScroll">{notes}</div><footer class="speaker-actions"><button id="copyPrompt" hidden>Скопировать запрос</button><button id="showFallback" hidden>Учебная исправленная версия</button><span id="copyStatus" role="status"></span></footer></aside><dialog id="contents"><div class="dialog-top"><h2>План урока · 60 минут</h2><button id="closeContents">Закрыть</button></div><nav>{nav}</nav></dialog><dialog id="fallback"><div class="dialog-top"><h2>Учебная исправленная версия</h2><button id="closeFallback">Закрыть</button></div><p class="fallback-text">Кошка — домашнее животное. Она хорошо видит в темноте. Кошки любят много спать.</p><p>Ровно три предложения, ответ про кошку. Это подготовленный текст, а не ответ сервиса.</p></dialog>{sprite}<script>const lessonData={public_json};</script><script>{js}</script></body></html>'''
 (D/'index.html').write_text(board.inject(html,'#stage'),encoding='utf-8')
 print('Built slide-only deck with optional notes: 24 slides, 60 minutes. Public copy contains no notes.')

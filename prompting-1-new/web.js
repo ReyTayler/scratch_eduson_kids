@@ -27,7 +27,7 @@ function resetInteractive(){
 }
 /* Интерактив прямо на слайде: нажатие на ответ или на элемент. */
 document.querySelectorAll('.qz-opt').forEach(b=>b.addEventListener('click',()=>{
- const q=b.closest('.qz');q.querySelectorAll('.qz-opt').forEach(x=>x.classList.remove('is-ok','is-no'));
+ const q=b.closest('.qz');if(q.classList.contains('done')){b.blur();return}q.querySelectorAll('.qz-opt').forEach(x=>x.classList.remove('is-ok','is-no'));
  const ok=b.dataset.ok!==undefined;b.classList.add(ok?'is-ok':'is-no');q.classList.toggle('done',ok);
  const f=q.querySelector('.qz-fb');if(f)f.classList.toggle('show',ok);b.blur();
 }));
@@ -37,6 +37,8 @@ function tapToggle(t){
 }
 document.querySelectorAll('.tap').forEach(t=>{t.addEventListener('click',()=>tapToggle(t));t.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();tapToggle(t)}})});
 document.addEventListener('pointermove',wake,{passive:true});
+/* После нажатия кнопки панели фокус снимается, чтобы клавиши-стрелки сразу работали. */
+document.addEventListener('click',ev=>{const b=ev.target.closest('.deck-toolbar button,.deck-controls button');if(b)b.blur()});
 document.addEventListener('keydown',ev=>{
  if(ev.target.closest('input,textarea,select')||document.querySelector('dialog[open]'))return;
  const key=ev.key.toLowerCase();

@@ -46,7 +46,6 @@ body.audience{width:100vw;height:100vh;overflow:hidden;background:#E9E9F1}
 .audience .wave-layout .steps li{font-size:26px;padding:20px 24px}
 .audience .answer{position:absolute;left:80px;right:80px;bottom:80px;z-index:5;margin:0;border:2px solid var(--ek-green-deep);border-radius:14px;padding:12px 24px;font:600 24px/1.5 var(--f-body);box-shadow:0 12px 30px rgba(23,23,28,.16);max-height:240px;background:#fff}
 .audience .slide--window .answer{bottom:88px}
-.slide:has(>.answer:not([hidden])) .lesson-question{visibility:hidden}
 .audience .strip{background:var(--ek-violet-bg);border-left:4px solid var(--ek-violet);border-radius:0 14px 14px 0;padding:14px 20px;font:600 24px/1.4 var(--f-body)}
 /* Diagrams retain the actual learning task, inside the book's components. */
 .audience .pipeline{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:26px}
@@ -146,8 +145,8 @@ body.audience{width:100vw;height:100vh;overflow:hidden;background:#E9E9F1}
 .audience .label-grid .digit{flex:1;min-height:0}
 .audience .lbl{font:800 32px/1 var(--f-head);color:var(--ek-violet-deep)}
 .audience .lbl i{font-style:normal}.audience .lbl b{display:none}
-.slide:has(>.answer:not([hidden])) .lbl i{display:none}
-.slide:has(>.answer:not([hidden])) .lbl b{display:inline}
+.slide:has(.qa-answer.on) .lbl i{display:none}
+.slide:has(.qa-answer.on) .lbl b{display:inline}
 .audience .color-case{display:grid;grid-template-columns:1.25fr 1fr;gap:20px}
 .audience .color-case>div{padding:14px 20px;background:#F5F5F9;border-radius:18px}
 .audience .color-row{display:grid;grid-template-columns:112px repeat(3,76px);gap:12px;align-items:center;margin-top:8px}
@@ -164,8 +163,8 @@ body.audience{width:100vw;height:100vh;overflow:hidden;background:#E9E9F1}
 .audience .combo-cell.is-missing{background:var(--ek-violet-bg);border:2px dashed var(--ek-violet)}
 .audience .combo-cell i{font:800 44px/1 var(--f-head);font-style:normal;color:var(--ek-violet-deep)}
 .audience .combo-cell span{display:none}
-.slide:has(>.answer:not([hidden])) .combo-cell i{display:none}
-.slide:has(>.answer:not([hidden])) .combo-cell span{display:flex;gap:10px}
+.slide:has(.qa-answer.on) .combo-cell i{display:none}
+.slide:has(.qa-answer.on) .combo-cell span{display:flex;gap:10px}
 .audience .combo-note{padding:20px 22px;background:#F5F5F9;border-radius:18px}
 .audience .combo-note p{font:500 23px/1.4 var(--f-body);margin-bottom:8px}
 .audience .live-flow{display:block;width:100%;height:auto}

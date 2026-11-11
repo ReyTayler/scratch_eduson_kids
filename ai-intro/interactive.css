@@ -1,0 +1,42 @@
+/* Интерактив прямо на слайде. Приподнятый край есть только у нажимаемого. */
+[data-show]{visibility:hidden}[data-show].on{visibility:visible}[data-hide].on{visibility:hidden}
+.tap{cursor:pointer}.tap.opened{cursor:default}
+.tap:focus{outline:none}.tap:focus-visible{outline:3px solid var(--ek-violet-deep);outline-offset:3px}
+.audience .tap-chip{flex:none;display:inline-flex;align-items:center;gap:7px;background:var(--ek-violet-deep);color:#fff;font:800 19px/1 var(--f-head);padding:8px 14px;border-radius:17px}
+.audience .tap-chip svg{width:13px;height:17px}
+/* Вопрос с ответом: нажимается весь вопрос */
+.audience .lesson-question.qa{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;background:#fff;border:2px solid var(--ek-violet-deep);border-left-width:4px;box-shadow:0 5px 0 var(--ek-violet-deep);margin-bottom:5px;padding:10px 18px}
+.audience .lesson-question.qa.opened{box-shadow:none;border-color:var(--ek-line);border-left-color:var(--ek-violet);background:var(--ek-violet-bg)}
+.audience .lesson-question.qa p{font:600 21px/1.25 var(--f-body);margin:0}
+.audience .lesson-question.qa{padding:7px 18px}
+.audience .lesson-question .qa-answer{color:#0B5B39;margin-top:4px!important}
+/* Итоговые вопросы: нажимается каждая строка */
+.audience .kind-exit .steps li.tap{position:relative;align-items:flex-start;border:2px solid var(--ek-violet-deep);box-shadow:0 5px 0 var(--ek-violet-deep);background:#fff;padding:10px 18px}
+.audience .kind-exit .steps li.tap::after{content:'';position:absolute;inset:0 0 -7px}
+.audience .kind-exit .steps li.tap.opened{box-shadow:none;border-color:var(--ek-line);background:#F5F5F9}
+.audience .kind-exit .steps li.tap.opened::after{display:none}
+.audience .kind-exit .steps li.tap>div{flex:1;display:flex;flex-direction:column;gap:4px}
+.audience .kind-exit .steps{gap:12px}
+.audience .wave-layout .steps li.tap{font-size:23px;line-height:1.3;padding:8px 16px}
+.audience .kind-exit .reply{font:600 20px/1.3 var(--f-body);font-style:normal;color:#0B5B39}
+/* Кнопки-ответы */
+.audience .qz-opts{display:flex;gap:10px;flex-shrink:0}
+.audience .qz-opt{font:700 20px/1.1 var(--f-head);min-width:104px;padding:9px 14px;margin-bottom:5px;border-radius:12px;border:2px solid var(--ek-ink);background:#fff;color:var(--ek-ink);cursor:pointer;box-shadow:0 5px 0 var(--ek-ink)}
+.audience .qz-opt:hover{background:#fff;border-color:var(--ek-ink)}
+.audience .qz-opt:active,.audience .qz-opt.is-ok,.audience .qz-opt.is-no{transform:translateY(5px);box-shadow:none}
+.audience .qz-opt.is-ok,.audience .qz-opt.is-ok:hover{background:var(--ek-green-pale);border-color:var(--ek-green-deep);color:#0B5B39}
+.audience .qz-opt.is-no,.audience .qz-opt.is-no:hover{background:var(--ek-red-pale);border-color:var(--ek-red-deep);color:#7A2E2E}
+.audience .qz-opt::after{content:'✓';visibility:hidden;display:inline-block;width:1.05em;margin-left:.2em;text-align:center}
+.audience .qz-opt.is-ok::after{content:'✓';visibility:visible}.audience .qz-opt.is-no::after{content:'✗';visibility:visible}
+.audience .qz-fb{visibility:hidden}.audience .qz-fb.show{visibility:visible}
+.audience .lesson-question.qz-line{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:8px 20px}
+.audience .qz-text{min-width:0}
+.audience .qz-line p{margin:0}
+.audience .qz-line .qz-q{font:600 22px/1.25 var(--f-body)}
+.audience .qz-line .qz-fb{font:600 20px/1.25 var(--f-body);color:#0B5B39;margin-top:2px}
+/* Ответ и пояснение не занимают места, пока их не показали: блок вопроса компактный и по центру. */
+.audience .qa-answer:not(.on),.audience .reply:not(.on),.audience .qz-fb:not(.show){display:none}
+.audience .lesson-question.qa{align-items:center}
+.audience .kind-exit .steps li.tap{align-items:center}
+.audience .kind-exit .steps li.tap>div{justify-content:center}
+@media print{[data-show],.audience .qz-fb{visibility:visible!important}}

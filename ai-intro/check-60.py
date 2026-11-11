@@ -35,9 +35,30 @@ with sync_playwright() as p:
         bad=page.evaluate('''()=>{const s=document.querySelector('.slide:not([hidden])');const els=[...s.querySelectorAll('h1,h2,h3,p,.visual,.info-card,.lesson-question,.lead,.strip,blockquote,.sl-body')];return els.filter(x=>{const r=x.getBoundingClientRect();return r.bottom>900.5||r.right>1600.5||r.top<-.5||x.scrollHeight>x.clientHeight+3&&['hidden','clip'].includes(getComputedStyle(x).overflow)||x.classList.contains('visual')&&x.scrollHeight>x.clientHeight+3}).map(x=>x.className+':'+x.textContent.slice(0,70))}''')
         if bad:violations.append([i+1,bad])
         if lesson['slides'][i]['answer']:
-            page.keyboard.press('Space')
-            page.locator(f'.slide[data-index="{i}"] .answer').wait_for(state='visible')
-            page.keyboard.press('Space')
+            cur=page.locator('.slide:not([hidden])')
+            assert cur.locator('.tap,.qz-opt').count()>0, f'слайд {i+1}: нет нажимаемого ответа'
+            if cur.locator('.qz').count():
+                wrong=cur.locator('.qz-opt:not([data-ok])').first;right=cur.locator('.qz-opt[data-ok]').first
+                x0=right.bounding_box()['x']
+                wrong.click();assert 'is-no' in wrong.get_attribute('class') and cur.locator('.qz-fb').is_hidden()
+                right.click();assert 'is-ok' in right.get_attribute('class') and cur.locator('.qz-fb').is_visible()
+                wrong.click();assert 'is-ok' in right.get_attribute('class') and 'is-no' not in wrong.get_attribute('class'), f'слайд {i+1}: верный ответ стёрт'
+                assert abs(right.bounding_box()['x']-x0)<1, f'слайд {i+1}: кнопка сдвинулась'
+            else:
+                taps=cur.locator('.tap')
+                for t in range(taps.count()):
+                    assert 'Нажмите' in taps.nth(t).inner_text(), f'слайд {i+1}: нет метки'
+                assert page.evaluate("()=>[...document.querySelectorAll('.slide:not([hidden]) [data-show]')].every(x=>(getComputedStyle(x).visibility==='hidden'||!x.getClientRects().length))")
+                for t in range(taps.count()):
+                    taps.nth(t).click();taps.nth(t).click()
+                assert page.evaluate("()=>[...document.querySelectorAll('.slide:not([hidden]) [data-show]')].every(x=>(getComputedStyle(x).visibility==='visible'&&x.getClientRects().length>0))"), f'слайд {i+1}: ответ не появился'
+            page.screenshot(path=str(Q/f'slide-{i+1:02}-open.png'))
+            bad=page.evaluate('''()=>{const s=document.querySelector('.slide:not([hidden])');return [...s.querySelectorAll('.lesson-question,.sl-body,.visual')].filter(x=>{const r=x.getBoundingClientRect();return r.bottom>900.5||x.scrollHeight>x.clientHeight+3&&x.classList.contains('visual')}).map(x=>x.className)}''')
+            if bad:violations.append([i+1,'после нажатия',bad])
+    # Стрелки работают сразу после нажатия кнопки «→» на панели.
+    page.evaluate('location.hash="3"');page.wait_for_function('!document.querySelectorAll(".slide")[2].hidden')
+    page.mouse.move(800,860);page.locator('#next').click();h=page.evaluate('location.hash')
+    page.keyboard.press('ArrowRight');assert page.evaluate('location.hash')!=h,'стрелка после кнопки не работает'
     # Homework follows the design book: label and three cards.
     page.evaluate('location.hash="23"')
     page.wait_for_function('!document.querySelectorAll(".slide")[22].hidden')

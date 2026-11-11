@@ -1,0 +1,104 @@
+/* Компоненты этого урока поверх каркаса Eduson Kids. */
+.audience .fig{flex:1 1 0;min-height:0;display:flex;align-items:center;justify-content:center}
+.audience .fig>svg{display:block;width:100%;height:100%;max-height:100%}
+.audience .visual{gap:14px}
+.audience .hints{display:flex;flex-wrap:wrap;gap:8px;flex-shrink:0}
+.audience .hints span{font:600 22px/1.3 var(--f-body);background:var(--ek-violet-bg);border-radius:12px;padding:7px 14px}
+.audience .strip{flex-shrink:0}
+/* Титул: три части промта и ответ */
+.audience .cover-parts{display:flex;align-items:center;justify-content:center;gap:10px;padding:6px 40px 36px}
+.audience .cover-parts>i{font:800 30px/1 var(--f-head);font-style:normal;color:var(--ek-violet-deep)}
+.audience .part{display:inline-flex;align-items:center;gap:9px;font:800 24px/1 var(--f-head);padding:11px 15px;border-radius:14px;border:2px solid}
+.audience .part b{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;color:#fff;font:800 18px/1 var(--f-head)}
+.audience .part-1{background:var(--ek-violet-bg);border-color:var(--ek-violet-deep)}.audience .part-1 b{background:var(--ek-violet-deep)}
+.audience .part-2{background:var(--ek-green-pale);border-color:var(--ek-green-deep)}.audience .part-2 b{background:var(--ek-green-deep)}
+.audience .part-3{background:var(--ek-red-pale);border-color:var(--ek-red-deep)}.audience .part-3 b{background:var(--ek-red-deep)}
+.audience .part-answer{background:#fff;border-color:var(--ek-ink)}
+/* Разминка: бабл со схемой */
+.audience .kind-break .bubble{width:940px;padding:30px 48px}
+.audience .kind-break .fig{height:165px;flex:none;margin:12px 0}
+/* Итоги: ответы открываются по пробелу */
+.audience .kind-exit .steps li>div{display:flex;flex-direction:column;gap:4px}
+.audience .kind-exit .steps li{font-size:24px;padding:14px 20px}
+.audience .reply{font:600 21px/1.3 var(--f-body);font-style:normal;color:#0B5B39}
+/* Итоги и цель: шесть действий помещаются в карточку */
+.audience .kind-goals .ek-note,.audience .kind-results .ek-note{flex-shrink:0}
+.audience .kind-results .visual{gap:12px;justify-content:flex-start}
+.audience .kind-results .ek-note{font:600 21px/1.35 var(--f-body);padding:10px 20px;margin:0}
+.audience .kind-results .ek-note--green{border-left-color:var(--ek-green-deep)}
+.audience .kind-results .info-card{padding:14px 22px}
+.audience .kind-results .info-card h3{font-size:25px;margin-bottom:8px}
+.audience .kind-results ul.clean li{font:500 20px/1.3 var(--f-body);gap:12px}
+.audience .kind-results .lesson-question{padding:10px 20px}
+.audience .kind-results .lesson-question p{font-size:22px}
+.audience .kind-goals ul.clean li{font-size:21px;line-height:1.3}
+.audience .kind-home .ek-note--red{font:600 23px/1.35 var(--f-body)}
+/* Практика: схема и промт в окне */
+.audience .slide--window .fig{min-height:120px}
+.audience .kind-revision .prompt-card{flex-shrink:0}
+/* План: пять строк занимают весь слайд */
+.audience .kind-agenda .agenda{gap:9px}
+.audience .kind-agenda .agenda-row{padding:8px 20px}
+.audience .kind-agenda .agenda-row .t{flex-basis:110px;font-size:20px}
+.audience .kind-agenda .agenda-row .tt{font-size:25px}
+.audience .kind-agenda .agenda-row .dd{font-size:21px;line-height:1.3}
+.audience .kind-exit .wave-layout{right:410px}
+.audience .slide--window .lead{font-size:23px;line-height:1.35}
+.audience .kind-home .info-card p{font-size:24px;line-height:1.4}
+.audience .kind-home .info-card{padding:20px 24px}
+.audience .kind-home .visual{gap:20px}
+/* Интерактив прямо на слайде. Приподнятый край есть только у нажимаемого. */
+[data-show]{visibility:hidden}[data-show].on{visibility:visible}[data-hide].on{visibility:hidden}
+.tap{cursor:pointer}.tap.opened{cursor:default}
+.tap:focus{outline:none}.tap:focus-visible{outline:3px solid var(--ek-violet-deep);outline-offset:3px}
+.audience .tap-chip{flex:none;display:inline-flex;align-items:center;gap:7px;background:var(--ek-violet-deep);color:#fff;font:800 19px/1 var(--f-head);padding:8px 14px;border-radius:17px}
+.audience .tap-chip svg{width:13px;height:17px}
+.audience .kind-exit .steps li.tap{align-items:flex-start;box-shadow:0 5px 0 var(--ek-violet-deep);border:2px solid var(--ek-violet-deep);background:#fff}
+.audience .kind-exit .steps li.tap.opened{box-shadow:none;border-color:var(--ek-line);background:#F5F5F9}
+.audience .kind-exit .steps li.tap>div{flex:1}
+.audience .kind-exit .steps li.tap{position:relative}
+.audience .kind-exit .steps li.tap::after{content:'';position:absolute;inset:0 0 -7px}
+.audience .kind-exit .steps li.tap.opened::after{display:none}
+.audience .kind-exit .steps{gap:14px}
+.audience .qz-opts{display:flex;gap:10px;flex-shrink:0}
+.audience .qz-opt{font:700 21px/1.1 var(--f-head);min-width:112px;padding:10px 16px;margin-bottom:5px;border-radius:12px;border:2px solid var(--ek-ink);background:#fff;color:var(--ek-ink);cursor:pointer;box-shadow:0 5px 0 var(--ek-ink)}
+.audience .qz-opt:hover{background:#fff;border-color:var(--ek-ink)}
+.audience .qz-opt:active,.audience .qz-opt.is-ok,.audience .qz-opt.is-no{transform:translateY(5px);box-shadow:none}
+.audience .qz-opt.is-ok,.audience .qz-opt.is-ok:hover{background:var(--ek-green-pale);border-color:var(--ek-green-deep);color:#0B5B39}
+.audience .qz-opt.is-no,.audience .qz-opt.is-no:hover{background:var(--ek-red-pale);border-color:var(--ek-red-deep);color:#7A2E2E}
+.audience .qz-opt::after{content:'✓';visibility:hidden;display:inline-block;width:1.05em;margin-left:.2em;text-align:center}
+.audience .qz-opt.is-ok::after{content:'✓';visibility:visible}.audience .qz-opt.is-no::after{content:'✗';visibility:visible}
+.audience .qz-fb{visibility:hidden}.audience .qz-fb.show{visibility:visible}
+.audience .qz-line{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-shrink:0;padding:8px 20px;margin:0}
+.audience .qz-text{min-width:0}
+.audience .qz-line p{margin:0}
+.audience .qz-line .qz-q{font:600 22px/1.25 var(--f-body)}
+.audience .qz-line .qz-fb{font:600 20px/1.25 var(--f-body);color:#0B5B39;margin-top:2px}
+.audience .kind-quiz .visual{gap:10px;justify-content:center}
+.audience .qz-row{display:flex;align-items:center;gap:16px;background:#F5F5F9;border-radius:14px;padding:6px 14px;flex-shrink:0}
+.audience .qz-row p{flex:1;font:600 21px/1.25 var(--f-body);margin:0}
+.audience .kind-quiz .qz-opt{font-size:19px;padding:8px 12px;min-width:104px}
+.audience .kind-quiz .sl-body{gap:12px}
+.audience .qz-mark{flex:none;display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:var(--ek-ink);color:#fff;font:800 19px/1 var(--f-head)}
+.audience .qz-big{display:flex;flex-direction:column;gap:18px;flex:1;min-height:0;justify-content:center}
+.audience .qz-big .qz-opts{gap:24px}
+.audience .kind-quiz .qz-card{flex:1;display:flex;flex-direction:column;align-items:center;gap:18px;padding:34px 20px;margin-bottom:6px;border-radius:18px;background:#fff;box-shadow:0 6px 0 var(--ek-ink)}
+.audience .qz-card b{font:800 30px/1.2 var(--f-head)}
+.audience .qz-card i{font:800 44px/1 var(--f-head);font-style:normal;color:var(--ek-gray)}
+.audience .qz:not(.done) .qz-card i{visibility:hidden}
+.audience .kind-quiz .qz-card.is-ok,.audience .kind-quiz .qz-card.is-no{box-shadow:none}
+/* Домашнее задание: промты для починки и пример */
+.audience .kind-home .visual{gap:12px;justify-content:flex-start}
+.audience .hw-row{display:flex;align-items:center;gap:16px;background:#F5F5F9;border-radius:14px;padding:8px 16px;flex-shrink:0}
+.audience .hw-row p{font:600 23px/1.3 var(--f-body);margin:0}
+.audience .kind-home .strip{font:600 21px/1.35 var(--f-body);padding:10px 20px}
+.audience .kind-home .ek-note--red{font:600 21px/1.35 var(--f-body);padding:10px 20px;margin:0}
+.audience .hw-note{font:500 21px/1.3 var(--f-body);color:#62616C;margin:0;flex-shrink:0}
+.audience .hw-example{display:grid;grid-template-columns:1fr 44px 1fr;align-items:center;gap:12px;flex:1;min-height:0;margin-top:8px}
+.audience .hw-go{align-self:center;font:800 40px/1 var(--f-head);color:var(--ek-violet-deep);text-align:center}
+.audience .hw-card{margin:0;padding:26px 24px 18px}
+.audience .hw-card .pc-text{font:600 24px/1.4 var(--f-body);text-align:left;word-spacing:normal}
+.audience .hw-reply,.audience .hw-check{font:500 22px/1.35 var(--f-body);margin:12px 0 0}
+.audience .hw-no .hw-check{color:#7A2E2E}.audience .hw-ok .hw-check{color:#0B5B39}
+.audience .kind-home-example .visual{gap:12px}
+@media print{[data-show],.audience .qz-fb{visibility:visible!important}}

@@ -21,6 +21,7 @@ Settings → Pages → Deploy from a branch → `main`, папка `/ (root)`. �
 | `ai-intro/` | Урок 1, 60 минут, с исходниками и сборкой (см. `ai-intro/README.md`). Сценарий для преподавателя: `ai-intro/Сценарий урока.html` |
 | `prompting-1-new/` | Урок 2, 60 минут, с исходниками и сборкой (см. `prompting-1-new/README.md`). Сценарий для преподавателя: `prompting-1-new/Сценарий урока.html` |
 | `prompting-2-new/` | Урок 3, 60 минут, с исходниками и сборкой (см. `prompting-2-new/README.md`). Сценарий для преподавателя: `prompting-2-new/Сценарий урока.html` |
+| `images-1/` | Урок 4 «Генерация изображений. Часть 1», 60 минут. [Презентация](images-1/dist/index.html), [сценарий](images-1/Сценарий%20урока.html), [инструкция](images-1/README.md). |
 | `prompting-2/` | Старая версия урока 3 на 45 минут, со страницы выбора не открывается. Не образец |
 | `assets/fonts/` | Шрифты страницы выбора урока: Inter и Inter Tight (лицензия OFL, тексты в `ai-intro/font-licenses/`) |
 | `План модуля 9.md` | Темы и границы уроков |

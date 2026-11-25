@@ -1,0 +1,17 @@
+{
+  "repository": "https://github.com/terenta/eduson-kids-design-book",
+  "downloaded": "2026-11-03",
+  "template": "src/lessons/deck_template.py",
+  "template_sha256": "38e14171adbbff8a621fc7b10ed532ad91d389c37fa32da0a4d519c3a06a92c7",
+  "rules": [
+    "src/parts/p02-principles.html",
+    "src/parts/p04-type.html",
+    "src/parts/p05-layout.html",
+    "src/parts/p05d-decor.html",
+    "src/parts/p06-components.html",
+    "src/parts/p07-slides.html",
+    "src/parts/p09-dodont.html",
+    "src/lessons/STYLE_GUIDE.md"
+  ],
+  "fonts": "Inter Tight / Inter / JetBrains Mono, Google Fonts, embedded WOFF2 including Cyrillic"
+}

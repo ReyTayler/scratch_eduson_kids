@@ -20,6 +20,7 @@ Settings → Pages → Deploy from a branch → `main`, папка `/ (root)`. �
 |---|---|
 | `ai-intro/` | Урок 1, 60 минут, с исходниками и сборкой (см. `ai-intro/README.md`). Сценарий для преподавателя: `ai-intro/Сценарий урока.html` |
 | `prompting-1-new/` | Урок 2, 60 минут, с исходниками и сборкой (см. `prompting-1-new/README.md`). Сценарий для преподавателя: `prompting-1-new/Сценарий урока.html` |
-| `prompting-2/` | Урок 3, презентация на 45 минут. Сборка: `python ai-intro/build.py prompting-2` |
+| `prompting-2-new/` | Урок 3, 60 минут, с исходниками и сборкой (см. `prompting-2-new/README.md`). Сценарий для преподавателя: `prompting-2-new/Сценарий урока.html` |
+| `prompting-2/` | Старая версия урока 3 на 45 минут, со страницы выбора не открывается. Не образец |
 | `assets/fonts/` | Шрифты страницы выбора урока: Inter и Inter Tight (лицензия OFL, тексты в `ai-intro/font-licenses/`) |
 | `План модуля 9.md` | Темы и границы уроков |
